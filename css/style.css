@@ -1,0 +1,40 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+body{
+    font-family: 'inter', sans-serif;
+    overflow-x: hidden;
+}
+
+.navbar{
+    background-color: #f2f2f20d;
+    border: 1px solid #f2f2f21a;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 25px #00000026;
+}
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.slide-down {
+    animation: slideDown 0.5s ;
+}
+
+.hidden {
+    display: none;
+  }
