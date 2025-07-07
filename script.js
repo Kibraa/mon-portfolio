@@ -206,14 +206,17 @@ function playSound() {
     sound.play();
 }
 
-let cursor = document.getElementById('cursor');
-document.addEventListener('DOMContentLoaded',function(){
-    document.addEventListener('mousemove', function(e) {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    const cursor = document.getElementById('cursor');
     
-})
+    document.addEventListener('mousemove', function (e) {
+        if (cursor) {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        }
+    });
+});
+
 
 const draggableElement = document.getElementById("draggable");
 const draggerElement = document.getElementById("dragger");
