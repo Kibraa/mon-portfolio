@@ -29,6 +29,13 @@ import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
 
+hide_streamlit_style = """
+<style>
+footer {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # CONFIG
