@@ -1,0 +1,42 @@
+<style>
+    .navbar {
+        background: rgba(10,10,15,0.92);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid $border;
+        padding: 0 2rem; height: 56px;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+        font-weight: 900; font-size: 15px; color: var(--text);
+        display: flex; align-items: center; gap: 8px; text-decoration: none;
+    }
+    .nav-logo .dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: var(--accent); box-shadow: 0 0 10px var(--accent);
+    }
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-links a {
+        padding: 6px 14px; border-radius: 999px;
+        font-size: 12.5px; font-weight: 600;
+        color: var(--muted); text-decoration: none; transition: all 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-cta {
+        padding: 7px 18px !important; border-radius: 999px !important;
+        background: var(--accent) !important; color: white !important;
+        font-weight: 700 !important; font-size: 12px !important;
+        box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+    }
+</style>
+
+<div class="navbar">
+    <span class="nav-logo"><span class="dot"></span> Ibrahim K.</span>
+    <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#alternance">Apprenticeship</a>
+        <a href="#contact" class="nav-cta">Contact me</a>
+    </div>
+</div>

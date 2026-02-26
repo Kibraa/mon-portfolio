@@ -1,0 +1,35 @@
+<style>
+    .alt-banner {
+        background: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(37,99,235,0.02));
+        border: 1px solid rgba(37,99,235,0.15);
+        border-radius: 20px; padding: 2.5rem;
+        text-align: center; position: relative; overflow: hidden;
+    }
+    .alt-banner::before {
+        content: ''; position: absolute; inset: 0;
+        background-image:
+            linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px);
+        background-size: 40px 40px; opacity: 0.5;
+    }
+    .alt-banner h3 {
+        font-size: 26px; font-weight: 900; color: var(--text);
+        letter-spacing: -1px; position: relative; z-index: 1;
+    }
+    .alt-banner p {
+        font-size: 14px; color: var(--muted);
+        position: relative; z-index: 1; margin-top: 8px;
+    }
+    .alt-banner strong { color: var(--text); }
+</style>
+
+<div style="max-width:1200px;margin:0.5rem auto 0;padding:0 2rem;">
+    <div class="alt-banner">
+        <h3>Available for Apprenticeship — September 2026</h3>
+        <p>Master's in Data Engineering &amp; AI · Efrei Paris · Year 4/5</p>
+        <p>
+            Progressive schedule: 3 days in company / 2 days at school →
+            <strong>100% company from April 2027</strong>
+        </p>
+    </div>
+</div>

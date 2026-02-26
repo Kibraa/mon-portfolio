@@ -1,0 +1,175 @@
+<style>
+    .exp-section {
+        background: $card_alt;
+        border-top: 1px solid $border;
+        padding: 4rem 2rem 3rem;
+    }
+    .exp-wrap { max-width: 1200px; margin: 0 auto; }
+
+    .exp-card {
+        background: var(--card);
+        border: 1px solid $border;
+        border-radius: 18px; padding: 24px;
+        margin-bottom: 14px;
+        position: relative; overflow: hidden;
+        transition: all 0.3s;
+    }
+    .exp-card::before {
+        content: ''; position: absolute; top: 0; left: 0;
+        width: 3px; height: 100%;
+        background: linear-gradient(to bottom, var(--accent), transparent);
+        opacity: 0; transition: opacity 0.3s;
+    }
+    .exp-card:hover {
+        transform: translateX(4px);
+        border-color: rgba(37,99,235,0.15);
+    }
+    .exp-card:hover::before { opacity: 1; }
+
+    .exp-header {
+        display: flex; justify-content: space-between;
+        align-items: flex-start; flex-wrap: wrap; gap: 8px;
+    }
+    .exp-title {
+        font-size: 16px; font-weight: 800;
+        color: var(--text); margin-bottom: 2px;
+    }
+    .exp-company { font-size: 13px; font-weight: 600; color: var(--accent); }
+    .exp-dates {
+        font-family: 'Fira Code', monospace;
+        font-size: 11px; color: var(--muted);
+    }
+
+    .badge-current {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 3px 10px; border-radius: 999px;
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        background: rgba(37,99,235,0.1); color: var(--accent-light);
+        border: 1px solid rgba(37,99,235,0.2); margin-bottom: 12px;
+    }
+
+    .exp-details {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 10px; margin: 14px 0;
+    }
+    .exp-detail-card {
+        background: $bg;
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 12px; padding: 14px;
+    }
+    .exp-detail-label {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.06em; color: var(--accent); margin-bottom: 6px;
+    }
+    .exp-detail-text { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+    .exp-bullets { list-style: none; padding: 0; margin: 10px 0 0; }
+    .exp-bullets li {
+        font-size: 13px; color: var(--muted); line-height: 1.6;
+        padding: 3px 0; display: flex; gap: 8px; align-items: flex-start;
+    }
+    .exp-bullets li span { color: var(--accent); margin-top: 2px; }
+</style>
+
+<div class="exp-section">
+    <div class="exp-wrap">
+        <div class="section-eyebrow">My Journey</div>
+        <div class="section-title">Experience</div>
+
+        <!-- Study'UP (ongoing) -->
+        <div class="exp-card" style="margin-top:2rem;">
+            <div class="badge-current">
+                <span class="pulse-dot"></span> Ongoing
+            </div>
+            <div class="exp-header">
+                <div>
+                    <div class="exp-title">R&amp;D Developer Intern</div>
+                    <div class="exp-company">Study'UP · Argenteuil</div>
+                </div>
+                <div class="exp-dates">Feb–May 2026 · 4 months</div>
+            </div>
+            <div class="exp-details">
+                <div class="exp-detail-card">
+                    <div class="exp-detail-label">AI Integration</div>
+                    <div class="exp-detail-text">
+                        Claude 3.5 API (Anthropic) via Python — explanations
+                        adapted from primary school to high school levels.
+                    </div>
+                </div>
+                <div class="exp-detail-card">
+                    <div class="exp-detail-label">Frontend</div>
+                    <div class="exp-detail-text">
+                        Next.js chat interface with LLM streaming
+                        to reduce perceived latency.
+                    </div>
+                </div>
+                <div class="exp-detail-card">
+                    <div class="exp-detail-label">Prompt Engineering</div>
+                    <div class="exp-detail-text">
+                        Socratic approach, structured instructions,
+                        and safe interactions.
+                    </div>
+                </div>
+            </div>
+            <div>
+                <span class="tag">Next.js</span>
+                <span class="tag">Python</span>
+                <span class="tag">Claude API</span>
+                <span class="tag">Prompt Engineering</span>
+            </div>
+        </div>
+
+        <!-- France Patrimoine -->
+        <div class="exp-card">
+            <div class="exp-header">
+                <div>
+                    <div class="exp-title">Web Developer Intern</div>
+                    <div class="exp-company">France Patrimoine Emc · Le Plessis-Trévise</div>
+                </div>
+                <div class="exp-dates">Jun–Jul 2025 · 2 months</div>
+            </div>
+            <ul class="exp-bullets">
+                <li>
+                    <span>▸</span>
+                    Internal Vue.js web app for sales tracking
+                    (lead management, meetings, files, signatures)
+                </li>
+                <li>
+                    <span>▸</span>
+                    Admin area for user management and
+                    sales performance supervision
+                </li>
+            </ul>
+            <div style="margin-top:12px;">
+                <span class="tag">Vue.js</span>
+                <span class="tag">JavaScript</span>
+            </div>
+        </div>
+
+        <!-- Alexis Finance -->
+        <div class="exp-card">
+            <div class="exp-header">
+                <div>
+                    <div class="exp-title">Web Developer Intern</div>
+                    <div class="exp-company">Alexis Finance · Noisy-le-Grand</div>
+                </div>
+                <div class="exp-dates">May–Jul 2024 · 2 months</div>
+            </div>
+            <ul class="exp-bullets">
+                <li>
+                    <span>▸</span>
+                    Website UX optimization in collaboration with the team
+                </li>
+                <li>
+                    <span>▸</span>
+                    Creation and integration of training videos
+                    (editing and content management)
+                </li>
+            </ul>
+            <div style="margin-top:12px;">
+                <span class="tag">HTML/CSS</span>
+                <span class="tag">UX</span>
+            </div>
+        </div>
+    </div>
+</div>

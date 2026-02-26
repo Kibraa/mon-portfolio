@@ -1,0 +1,148 @@
+<style>
+    .projects-section {
+        padding: 4rem 2rem;
+        max-width: 1200px; margin: 0 auto;
+    }
+    .project-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 20px; margin-top: 2rem;
+    }
+    .project-card {
+        background: var(--card);
+        border: 1px solid $border;
+        border-radius: 20px; overflow: hidden;
+        transition: all 0.35s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+    .project-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(37,99,235,0.25);
+        box-shadow: 0 20px 50px rgba(37,99,235,0.08);
+    }
+    .project-header {
+        height: 170px; display: flex;
+        align-items: center; justify-content: center;
+        position: relative; overflow: hidden;
+    }
+    .project-header::before {
+        content: ''; position: absolute; inset: 0;
+        background-image:
+            linear-gradient(rgba(37,99,235,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(37,99,235,0.04) 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+    .project-icon {
+        font-size: 52px; position: relative; z-index: 1;
+        filter: drop-shadow(0 0 20px rgba(37,99,235,0.3));
+    }
+    .project-body { padding: 22px; }
+    .project-body h3 {
+        font-size: 17px; font-weight: 800;
+        color: var(--text); margin: 10px 0 8px;
+    }
+    .project-body p {
+        font-size: 12.5px; color: var(--muted);
+        line-height: 1.65; margin-bottom: 14px;
+    }
+
+    .badge-pipe {
+        display: inline-flex; padding: 3px 10px; border-radius: 999px;
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        background: rgba(16,185,129,0.08); color: $green;
+        border: 1px solid rgba(16,185,129,0.2);
+    }
+    .badge-ai {
+        display: inline-flex; padding: 3px 10px; border-radius: 999px;
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        background: rgba(168,85,247,0.08); color: $purple_light;
+        border: 1px solid rgba(168,85,247,0.2);
+    }
+    .badge-cloud {
+        display: inline-flex; padding: 3px 10px; border-radius: 999px;
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        background: rgba(245,158,11,0.08); color: $amber;
+        border: 1px solid rgba(245,158,11,0.2);
+    }
+</style>
+
+<div class="projects-section">
+    <div class="section-eyebrow">Réalisations</div>
+    <div class="section-title">Projets Piliers</div>
+    <div class="section-desc">
+        Architectures complètes, de l'ingestion à la visualisation.
+    </div>
+
+    <div class="project-grid">
+
+        <!-- LogStream Architect -->
+        <div class="project-card">
+            <div class="project-header"
+                 style="background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(16,185,129,0.01))">
+                <div class="project-icon">🔄</div>
+            </div>
+            <div class="project-body">
+                <span class="badge-pipe">Pipeline ETL</span>
+                <h3>LogStream Architect</h3>
+                <p>
+                    Pipeline ETL temps réel sous Docker traitant des flux massifs
+                    de logs applicatifs. Ingestion via Kafka, transformation Python,
+                    chargement vers PostgreSQL. Monitoring Grafana avec alerting.
+                </p>
+                <div>
+                    <span class="tag">Python</span>
+                    <span class="tag">Docker</span>
+                    <span class="tag">Kafka</span>
+                    <span class="tag">PostgreSQL</span>
+                    <span class="tag">Grafana</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Semantic Brain -->
+        <div class="project-card">
+            <div class="project-header"
+                 style="background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(168,85,247,0.01))">
+                <div class="project-icon">🧠</div>
+            </div>
+            <div class="project-body">
+                <span class="badge-ai">Intelligence Artificielle</span>
+                <h3>Semantic Brain</h3>
+                <p>
+                    Moteur de recherche sémantique exploitant l'API Claude 3.5
+                    et une base vectorielle Pinecone. Indexation par embeddings,
+                    retrieval RAG et génération de réponses contextualisées.
+                </p>
+                <div>
+                    <span class="tag">Claude API</span>
+                    <span class="tag">RAG</span>
+                    <span class="tag">Pinecone</span>
+                    <span class="tag">Python</span>
+                    <span class="tag">FastAPI</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cloudify Analytics -->
+        <div class="project-card">
+            <div class="project-header"
+                 style="background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(245,158,11,0.01))">
+                <div class="project-icon">☁️</div>
+            </div>
+            <div class="project-body">
+                <span class="badge-cloud">Cloud Monitoring</span>
+                <h3>Cloudify Analytics</h3>
+                <p>
+                    Dashboard de monitoring de performance d'infrastructure Cloud.
+                    Collecte de métriques via agents conteneurisés, visualisation
+                    Plotly temps réel et alerting par seuils dynamiques.
+                </p>
+                <div>
+                    <span class="tag">Next.js</span>
+                    <span class="tag">Python</span>
+                    <span class="tag">Docker</span>
+                    <span class="tag">Plotly</span>
+                    <span class="tag">Supabase</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

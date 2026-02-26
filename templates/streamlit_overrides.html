@@ -1,0 +1,42 @@
+<!-- Streamlit global overrides — injected via st.markdown -->
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap');
+
+    .stApp {
+        background-color: $bg !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    .stApp > header,
+    header[data-testid="stHeader"],
+    [data-testid="stHeader"],
+    [data-testid="stToolbar"] {
+        display: none !important;
+        height: 0 !important;
+    }
+    [data-testid="stSidebar"] { display: none !important; }
+    .block-container { padding: 0 !important; max-width: 100% !important; }
+    section[data-testid="stMain"] > div,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewContainer"] > .main {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+        top: 0 !important;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: $bg; }
+    ::-webkit-scrollbar-thumb { background: $accent; border-radius: 3px; }
+
+    #MainMenu, footer, [data-testid="stDecoration"],
+    .stDeployButton { display: none !important; }
+    div[data-testid="stVerticalBlock"] > div { gap: 0 !important; }
+    .js-plotly-plot .plotly .modebar { display: none !important; }
+    iframe { border: none !important; }
+    .section-anchor {
+        display: block;
+        position: relative;
+        top: -12px;
+        visibility: hidden;
+        height: 0;
+    }
+</style>

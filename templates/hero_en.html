@@ -1,0 +1,157 @@
+<style>
+    .hero {
+        min-height: 92vh; display: flex; align-items: center;
+        padding: 3rem 2rem; position: relative; overflow: hidden;
+    }
+    .hero::before {
+        content: ''; position: absolute; inset: 0;
+        background-image:
+            linear-gradient(rgba(37,99,235,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(37,99,235,0.04) 1px, transparent 1px);
+        background-size: 50px 50px;
+        mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 100%);
+    }
+    .hero-glow {
+        position: absolute; width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+        top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;
+    }
+    .hero-content {
+        position: relative; z-index: 2;
+        max-width: 1200px; margin: 0 auto; width: 100%;
+    }
+    .hero-grid {
+        display: grid; grid-template-columns: 1.15fr 0.85fr;
+        gap: 3rem; align-items: center;
+    }
+    .hero-title {
+        font-size: clamp(44px, 6vw, 78px); font-weight: 900;
+        line-height: 1.05; letter-spacing: -2.5px;
+        color: var(--text); margin-bottom: 1.2rem;
+    }
+    .hero-title .accent { color: var(--accent); }
+    .hero-sub {
+        color: var(--muted); font-size: 15.5px;
+        line-height: 1.7; max-width: 540px; margin-bottom: 0.5rem;
+    }
+    .hero-sub strong { color: var(--text); font-weight: 700; }
+    .hero-mono {
+        font-family: 'Fira Code', monospace;
+        font-size: 12px; color: rgba(37,99,235,0.55); margin-bottom: 1.8rem;
+    }
+    .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hero-btns a {
+        padding: 12px 24px; font-weight: 700; font-size: 13px;
+        border-radius: 999px; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-primary {
+        background: var(--accent); color: white !important;
+        box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+    }
+    .btn-ghost { border: 1px solid rgba(255,255,255,0.1); color: var(--muted) !important; }
+    .btn-ghost:hover { color: var(--text) !important; border-color: rgba(255,255,255,0.2); }
+
+    .eyebrow {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 5px 14px; border-radius: 999px;
+        font-size: 10.5px; font-weight: 800;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--accent);
+        background: rgba(37,99,235,0.08);
+        border: 1px solid rgba(37,99,235,0.18);
+        margin-bottom: 1.5rem;
+    }
+
+    .right-col { display: flex; flex-direction: column; gap: 12px; }
+    .info-card {
+        background: var(--card); border: 1px solid $border;
+        border-radius: 16px; padding: 20px;
+    }
+    .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .stat-card {
+        background: var(--card); border: 1px solid $border;
+        border-radius: 16px; padding: 18px; text-align: center;
+    }
+    .stat-num { font-size: 30px; font-weight: 900; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .spec-card {
+        background: rgba(37,99,235,0.04);
+        border: 1px solid rgba(37,99,235,0.15);
+        border-radius: 14px; padding: 16px;
+        display: flex; align-items: center; gap: 12px;
+    }
+</style>
+
+<div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <div class="hero-grid">
+            <!-- Left column -->
+            <div>
+                <div class="eyebrow">
+                    <span class="pulse-dot"></span>
+                    Open for Apprenticeship · Sep 2026
+                </div>
+                <h1 class="hero-title">
+                    Data<br><span class="accent">Engineer</span>
+                </h1>
+                <p class="hero-sub">
+                    From building software applications to
+                    <strong>engineering large-scale data systems</strong>.
+                    Engineering student at <strong>Efrei Paris</strong>, transitioning
+                    toward a Master's in <strong>Data Engineering &amp; AI</strong> with the
+                    rigor of a developer and the vision of a data architect.
+                </p>
+                <p class="hero-mono">// Data &amp; AI Master's · Efrei Paris · 2026–2028</p>
+                <div class="hero-btns">
+                    <a href="https://github.com/Kibraa" target="_blank" class="btn-primary">
+                        View my projects ↓
+                    </a>
+                    <a href="https://github.com/Kibraa" target="_blank" class="btn-ghost">
+                        GitHub →
+                    </a>
+                    <a href="mailto:karamanlian.ibrahim@gmail.com" class="btn-ghost">
+                        Contact
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div class="right-col">
+                <div class="info-card">
+                    <div style="font-size:14px;font-weight:800;color:var(--text);">
+                        Efrei Paris Panthéon-Assas
+                    </div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:3px;">
+                        Web Bachelor's → Data Engineering &amp; AI Master's · 2023–2028
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-card">
+                        <div class="stat-num">3</div>
+                        <div class="stat-label">Company internships</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num">4+</div>
+                        <div class="stat-label">Projects delivered</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num">24</div>
+                        <div class="stat-label">Apprenticeship months</div>
+                    </div>
+                </div>
+                <div class="spec-card">
+                    <span style="font-size:22px;">🧠</span>
+                    <div>
+                        <div style="font-size:13px;font-weight:800;color:var(--text);">
+                            Data &amp; AI Specialization
+                        </div>
+                        <div style="font-size:11px;color:var(--muted);">
+                            LLM APIs · ETL Pipelines · Python
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

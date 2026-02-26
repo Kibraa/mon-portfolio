@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════════════════
+   BASE CSS — Ibrahim Karamanlian Portfolio
+   Variables: $accent, $accent_light, $bg, $card, $card_alt,
+              $text, $muted, $border, $green, $amber, $purple, $purple_light
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap');
+
+:root {
+    --accent: $accent;
+    --accent-light: $accent_light;
+    --bg: $bg;
+    --card: $card;
+    --card-alt: $card_alt;
+    --text: $text;
+    --muted: $muted;
+    --border: $border;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(37,99,235,0.3); }
+
+/* ── Typography ── */
+.section-eyebrow {
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px;
+}
+.section-title {
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 900; color: var(--text);
+    letter-spacing: -1.5px; margin-bottom: 0.6rem;
+}
+.section-desc {
+    color: var(--muted); font-size: 14px;
+    max-width: 520px; line-height: 1.7;
+}
+.section-desc strong { color: var(--text); }
+
+/* ── Tags ── */
+.tag {
+    display: inline-flex; padding: 3px 10px;
+    border-radius: 999px; font-size: 10.5px; font-weight: 700;
+    background: rgba(37,99,235,0.08); color: var(--accent-light);
+    border: 1px solid rgba(37,99,235,0.15); margin: 2px;
+}
+
+/* ── Pulse animation ── */
+.pulse-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.5s ease-in-out infinite;
+    display: inline-block;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
