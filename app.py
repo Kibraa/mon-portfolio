@@ -22,6 +22,7 @@
 ╚══════════════════════════════════════════════════════════════╝
 """
 
+import base64
 from pathlib import Path
 from string import Template
 
@@ -96,9 +97,16 @@ def T(raw: str) -> str:
 _BASE_CSS = T(load("base.css"))
 
 
-def render_html(template_name: str, height: int = 600, lang: str = "FR") -> None:
+def render_html(
+    template_name: str,
+    height: int = 600,
+    lang: str = "FR",
+    extra_vars: dict[str, str] | None = None,
+) -> None:
     """Charge un template HTML, injecte le thème, rend via iframe."""
-    body = T(load(template_name, lang=lang))
+    body = Template(load(template_name, lang=lang)).safe_substitute(
+        {**THEME, **(extra_vars or {})}
+    )
     doc = (
         "<!DOCTYPE html><html><head><meta charset='utf-8'>"
         "<style>" + _BASE_CSS + "</style>"
@@ -122,6 +130,29 @@ def render_html(template_name: str, height: int = 600, lang: str = "FR") -> None
 def render_inline(template_name: str, lang: str = "FR") -> None:
     """Rend un template directement dans le DOM Streamlit (sans iframe)."""
     st.markdown(T(load(template_name, lang=lang)), unsafe_allow_html=True)
+
+
+@st.cache_data
+def _get_pdf_b64(filename: str) -> str:
+    """Lit un PDF depuis assets/ et le retourne en base64."""
+    path = Path(__file__).parent / "assets" / filename
+    return base64.b64encode(path.read_bytes()).decode()
+
+
+def render_cv(lang: str) -> None:
+    """Charge cv.html, injecte le thème + données PDF, rend via iframe fixe."""
+    pdf_vars = {
+        "pdf_fr": _get_pdf_b64("CV_IBRAHIM_2026.pdf"),
+        "pdf_en": _get_pdf_b64("CV_Ibrahim_Data.pdf"),
+    }
+    raw  = load("cv.html", lang=lang)
+    body = Template(raw).safe_substitute({**THEME, **pdf_vars})
+    doc  = (
+        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        "<style>" + _BASE_CSS + "</style>"
+        "</head><body>" + body + "</body></html>"
+    )
+    components.html(doc, height=840, scrolling=False)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -208,26 +239,33 @@ render_html("hero.html", height=680, lang=LANG)
 # SKILLS — Header + Plotly Charts
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 st.markdown("<div id='skills' class='section-anchor'></div>", unsafe_allow_html=True)
-render_html("skills_header.html", height=160, lang=LANG)
+render_html("skills_header.html", height=220, lang=LANG)
 
 RADAR_CATEGORIES = [
-    "Python", "SQL", "JavaScript", "Docker",
-    "CI/CD", "Cloud", "LLMs / RAG", "ETL Pipelines", "Data Viz",
+    "Python", "SQL", "JavaScript",
+    "React", "Next.js", "Node.js",
+    "Docker", "Git",
+    "LLMs", "PostgreSQL",
 ]
-RADAR_VALUES = [92, 80, 85, 75, 70, 60, 78, 72, 82]
+RADAR_VALUES = [70, 75, 80, 80, 78, 75, 65, 75, 25, 75]
+
+_k_data = "Data & AI"      if LANG == "EN" else "Data & IA"
+_k_lang = "Core Languages" if LANG == "EN" else "Langages"
+_k_fw   = "Frameworks & Tools"
+_k_ops  = "Platform & Ops"
 
 SKILL_GROUPS = {
-    "Engineering":    {"Python": 92, "SQL": 80, "JavaScript/TS": 85, "Java": 55},
-    "Infrastructure": {"Docker": 75, "CI/CD": 70, "Cloud (AWS/GCP)": 60, "Kubernetes": 45},
-    "Data & AI" if LANG == "EN" else "Data & IA": {
-        "LLMs (Claude/RAG)": 78, "ETL Pipelines": 72, "Pandas/NumPy": 76, "Data Viz": 82
-    },
+    _k_lang: {"Python": 70, "SQL": 75, "JavaScript": 80},
+    _k_fw:   {"Node.js": 75, "Symfony": 65, "React": 80, "Next.js": 78},
+    _k_ops:  {"Docker": 65, "Git": 75, "Bash": 65, "VMWare": 60},
+    _k_data: {"LLMs": 25, "PostgreSQL": 75, "NoSQL": 75},
 }
 
 GROUP_COLORS = {
-    "Engineering":    THEME["accent"],
-    "Infrastructure": THEME["green"],
-    "Data & AI" if LANG == "EN" else "Data & IA": THEME["purple"],
+    _k_lang: THEME["accent"],
+    _k_fw:   THEME["green"],
+    _k_ops:  THEME["amber"],
+    _k_data: THEME["purple"],
 }
 
 col_radar, col_bar = st.columns(2, gap="medium")
@@ -302,12 +340,23 @@ with col_bar:
     )
     st.plotly_chart(fig_bar, use_container_width=True, config={"displayModeBar": False})
 
+_disclaimer = (
+    "These scores reflect my own honest assessment — rated on a scale of 0 to 100 based on my experience."
+    if LANG == "EN" else
+    "Ces scores reflètent mon auto-évaluation honnête — notés sur une échelle de 0 à 100 selon mon expérience."
+)
+st.markdown(
+    f'<p style="text-align:center;color:rgba(160,160,170,0.55);font-size:0.78rem;'
+    f'font-style:italic;margin-top:-0.5rem;margin-bottom:1.5rem;">{_disclaimer}</p>',
+    unsafe_allow_html=True,
+)
+
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # PROJECTS
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 st.markdown("<div id='projects' class='section-anchor'></div>", unsafe_allow_html=True)
-render_html("projects.html", height=620, lang=LANG)
+render_html("projects.html", height=780, lang=LANG)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -315,31 +364,39 @@ render_html("projects.html", height=620, lang=LANG)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 st.markdown(T(load("sankey_label.html", lang=LANG)), unsafe_allow_html=True)
 
+_sankey_roles = (
+    ["User", "UI", "API", "Storage", "AI", "Infra"]
+    if LANG == "EN" else
+    ["Utilisateur", "Interface", "API", "Stockage", "IA", "Infra"]
+)
+
 fig_sankey = go.Figure(go.Sankey(
     arrangement="snap",
     node=dict(
-        pad=20, thickness=22,
+        pad=22, thickness=22,
         line=dict(color="rgba(37,99,235,0.3)", width=1),
         label=[
-            "App Logs", "Kafka Broker", "Python ETL",
-            "PostgreSQL", "Grafana Dashboard", "Alerting",
+            "Client / Browser",
+            "Next.js · React",
+            "Node.js · Symfony",
+            "PostgreSQL · NoSQL",
+            "Python · LLMs",
+            "Docker · Git",
         ],
         color=[THEME["card_alt"]] * 6,
-        customdata=[
-            "Source", "Ingestion", "Transform",
-            "Storage", "Viz", "Monitoring",
-        ],
+        customdata=_sankey_roles,
         hovertemplate="%{label}<br><i>%{customdata}</i><extra></extra>",
     ),
     link=dict(
-        source=[0, 1, 2, 3, 3],
-        target=[1, 2, 3, 4, 5],
-        value=[8, 8, 8, 5, 3],
+        source=[0, 1, 2, 2, 3, 4],
+        target=[1, 2, 3, 4, 5, 5],
+        value=[10, 10, 6, 4, 4, 4],
         color=[
             "rgba(37,99,235,0.15)",
             "rgba(37,99,235,0.15)",
-            "rgba(37,99,235,0.15)",
             "rgba(16,185,129,0.15)",
+            "rgba(168,85,247,0.15)",
+            "rgba(245,158,11,0.15)",
             "rgba(245,158,11,0.15)",
         ],
         hovertemplate="%{source.label} → %{target.label}<extra></extra>",
@@ -359,7 +416,7 @@ st.plotly_chart(fig_sankey, use_container_width=True, config={"displayModeBar": 
 # EXPERIENCES
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 st.markdown("<div id='experience' class='section-anchor'></div>", unsafe_allow_html=True)
-render_html("experiences.html", height=820, lang=LANG)
+render_html("experiences.html", height=1040, lang=LANG)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -421,7 +478,24 @@ render_html("alternance_banner.html", height=200, lang=LANG)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# CV
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+st.markdown("<div id='cv' class='section-anchor'></div>", unsafe_allow_html=True)
+render_cv(LANG)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # CONTACT + FOOTER
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 st.markdown("<div id='contact' class='section-anchor'></div>", unsafe_allow_html=True)
-render_html("contact.html", height=380, lang=LANG)
+contact_pdf_file = "CV_Ibrahim_Data.pdf" if LANG == "EN" else "CV_IBRAHIM_2026.pdf"
+contact_pdf_name = "CV_Ibrahim_Data.pdf" if LANG == "EN" else "CV_Ibrahim_Karamanlian_FR.pdf"
+render_html(
+    "contact.html",
+    height=430,
+    lang=LANG,
+    extra_vars={
+        "cv_download_href": "data:application/pdf;base64," + _get_pdf_b64(contact_pdf_file),
+        "cv_download_name": contact_pdf_name,
+    },
+)

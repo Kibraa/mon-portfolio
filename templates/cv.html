@@ -1,0 +1,233 @@
+<style>
+    .cv-section {
+        padding: 4rem 2rem 3rem;
+        border-top: 1px solid $border;
+    }
+    .cv-wrap { max-width: 900px; margin: 0 auto; }
+
+    .cv-head { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+    .cv-icon {
+        width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+        background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25);
+        display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .cv-title { font-size: 26px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
+    .cv-title span { color: var(--accent); }
+    .cv-sub { color: var(--muted); font-size: 13px; margin: 8px 0 22px 60px; }
+
+    .cv-toolbar {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+    }
+    .cv-tabs { display: flex; gap: 8px; }
+    .cv-tab {
+        padding: 7px 20px; border-radius: 999px; cursor: pointer;
+        font-size: 13px; font-weight: 600; outline: none; font-family: inherit;
+        border: 1px solid $border; color: var(--muted);
+        background: transparent; transition: all 0.2s;
+    }
+    .cv-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .cv-tab:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .cv-viewer {
+        border: 1px solid $border; border-radius: 14px; overflow: hidden;
+        height: 640px; background: #525659; overflow-y: auto;
+        padding: 12px;
+    }
+    .cv-loading {
+        display: flex; align-items: center; justify-content: center;
+        height: 100%; color: var(--muted); font-size: 13px; gap: 8px;
+    }
+    .cv-spinner {
+        width: 18px; height: 18px; border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.15);
+        border-top-color: var(--accent);
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .pdf-pages canvas {
+        width: 100%; display: block;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+
+    .cv-actions { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+    .cv-dl {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 10px 22px; border-radius: 999px;
+        font-size: 13px; font-weight: 700; text-decoration: none;
+        font-family: inherit; transition: all 0.2s;
+    }
+    .cv-dl-primary {
+        background: var(--accent); color: #fff;
+        box-shadow: 0 4px 16px rgba(37,99,235,0.32);
+    }
+    .cv-dl-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(37,99,235,0.45); }
+    .cv-dl-secondary {
+        background: rgba(37,99,235,0.1); color: $accent_light;
+        border: 1px solid rgba(37,99,235,0.22);
+    }
+    .cv-dl-secondary:hover { background: rgba(37,99,235,0.18); }
+
+    /* Easter egg */
+    .egg {
+        position: fixed; bottom: -200px; right: 20px;
+        background: $card; border: 1px solid rgba(37,99,235,0.28);
+        border-radius: 16px; padding: 14px 40px 14px 16px;
+        display: flex; align-items: flex-start; gap: 11px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(37,99,235,0.06);
+        transition: bottom 0.55s cubic-bezier(0.34,1.56,0.64,1);
+        z-index: 9999; max-width: 272px;
+    }
+    .egg.show { bottom: 20px; }
+    .egg-guy { font-size: 30px; flex-shrink: 0; animation: wobble 1.8s ease-in-out infinite; }
+    @keyframes wobble {
+        0%, 100% { transform: rotate(-6deg); }
+        50%       { transform: rotate(6deg); }
+    }
+    .egg-msg { font-size: 13px; font-weight: 700; color: var(--text); }
+    .egg-sub { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+    .egg-close {
+        position: absolute; top: 8px; right: 10px; cursor: pointer;
+        color: var(--muted); font-size: 18px; line-height: 1;
+        background: none; border: none; font-family: inherit;
+    }
+    .egg-close:hover { color: var(--text); }
+</style>
+
+<div class="cv-section">
+    <div class="cv-wrap">
+
+        <div class="cv-head">
+            <div class="cv-icon">📄</div>
+            <div class="cv-title">Mon <span>CV</span></div>
+        </div>
+        <p class="cv-sub">Disponible en français et en anglais — visualisez directement ou téléchargez</p>
+
+        <div class="cv-toolbar">
+            <div class="cv-tabs">
+                <button class="cv-tab active" id="tab-fr" onclick="showCV('fr')">🇫🇷 Français</button>
+                <button class="cv-tab"        id="tab-en" onclick="showCV('en')">🇬🇧 English</button>
+            </div>
+            <div class="cv-actions">
+                <a id="dl-fr" class="cv-dl cv-dl-primary" href="#" download="CV_Ibrahim_Karamanlian_FR.pdf">⬇ Télécharger CV FR</a>
+                <a id="dl-en" class="cv-dl cv-dl-secondary" href="#" download="CV_Ibrahim_Data.pdf">⬇ Download CV EN</a>
+            </div>
+        </div>
+
+        <div class="cv-viewer" id="cv-viewer">
+            <div id="viewer-fr">
+                <div class="cv-loading"><div class="cv-spinner"></div> Chargement du PDF…</div>
+                <div class="pdf-pages" id="pages-fr"></div>
+            </div>
+            <div id="viewer-en" style="display:none;">
+                <div class="pdf-pages" id="pages-en"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="egg" id="egg">
+    <button class="egg-close" onclick="closeEgg()">×</button>
+    <div class="egg-guy" id="egg-guy"></div>
+    <div>
+        <div class="egg-msg" id="egg-msg"></div>
+        <div class="egg-sub" id="egg-sub"></div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    var PDF_FR = '$pdf_fr';
+    var PDF_EN = '$pdf_en';
+    var loaded = {fr: false, en: false};
+
+    function b64ToBytes(b64) {
+        var binary = atob(b64);
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+        return bytes;
+    }
+
+    function renderPDF(b64Data, pagesId, loadingEl) {
+        var container = document.getElementById(pagesId);
+        pdfjsLib.getDocument({data: b64ToBytes(b64Data)}).promise.then(function(pdf) {
+            if (loadingEl) { loadingEl.style.display = 'none'; }
+            for (var p = 1; p <= pdf.numPages; p++) {
+                (function(pageNum) {
+                    var placeholder = document.createElement('div');
+                    placeholder.id = pagesId + '-p' + pageNum;
+                    container.appendChild(placeholder);
+                    pdf.getPage(pageNum).then(function(page) {
+                        var w = container.offsetWidth || 820;
+                        var native = page.getViewport({scale: 1});
+                        var scale = w / native.width;
+                        var viewport = page.getViewport({scale: scale});
+                        var canvas = document.createElement('canvas');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        placeholder.appendChild(canvas);
+                        page.render({canvasContext: canvas.getContext('2d'), viewport: viewport});
+                    });
+                })(p);
+            }
+        }).catch(function(err) {
+            if (loadingEl) { loadingEl.innerHTML = ''; }
+            container.innerHTML = '<p style="color:#f87171;padding:16px;font-size:13px;">Erreur de rendu : ' + err.message + '</p>';
+        });
+    }
+
+    // Build download hrefs from base64
+    function makeDataHref(b64) {
+        return 'data:application/pdf;base64,' + b64;
+    }
+    document.getElementById('dl-fr').href = makeDataHref(PDF_FR);
+    document.getElementById('dl-en').href = makeDataHref(PDF_EN);
+
+    // Initial render — FR
+    var loadingDiv = document.querySelector('#viewer-fr .cv-loading');
+    renderPDF(PDF_FR, 'pages-fr', loadingDiv);
+    loaded.fr = true;
+
+    function showCV(lang) {
+        document.getElementById('viewer-fr').style.display = lang === 'fr' ? 'block' : 'none';
+        document.getElementById('viewer-en').style.display = lang === 'en' ? 'block' : 'none';
+        document.getElementById('tab-fr').classList.toggle('active', lang === 'fr');
+        document.getElementById('tab-en').classList.toggle('active', lang === 'en');
+        if (!loaded[lang]) {
+            renderPDF(PDF_EN, 'pages-en', null);
+            loaded.en = true;
+        }
+    }
+
+    // Easter egg
+    var EGGS = [
+        {icon: '\ud83d\udd75\ufe0f', msg: 'Toujours en train de r\u00e9fl\u00e9chir ?', sub: 'C\u2019est gratuit de le t\u00e9l\u00e9charger, tkt.'},
+        {icon: '\ud83d\udc40',       msg: 'Petit rappel utile', sub: 'Le bouton bleu t\u00e9l\u00e9charge le CV en un clic.'},
+        {icon: '\ud83e\udd0c',       msg: 'Lecture compl\u00e8te valid\u00e9e', sub: 'La version PDF reste dispo quand tu veux.'}
+    ];
+    var eggIdx = 0;
+
+    var eggAutoHide = null;
+
+    function showEgg() {
+        var e = EGGS[eggIdx % EGGS.length];
+        document.getElementById('egg-guy').textContent = e.icon;
+        document.getElementById('egg-msg').textContent = e.msg;
+        document.getElementById('egg-sub').textContent = e.sub;
+        document.getElementById('egg').classList.add('show');
+        eggIdx++;
+        if (eggAutoHide) { clearTimeout(eggAutoHide); }
+        eggAutoHide = setTimeout(closeEgg, 8000);
+    }
+    function closeEgg() {
+        if (eggAutoHide) { clearTimeout(eggAutoHide); eggAutoHide = null; }
+        document.getElementById('egg').classList.remove('show');
+        setTimeout(showEgg, 30000);
+    }
+    setTimeout(showEgg, 8000);
+</script>
