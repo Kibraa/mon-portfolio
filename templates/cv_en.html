@@ -94,6 +94,12 @@
         background: none; border: none; font-family: inherit;
     }
     .egg-close:hover { color: var(--text); }
+    @media (max-width: 680px) {
+        .cv-section { padding: 2.5rem 1.2rem 2rem; }
+        .cv-toolbar { flex-direction: column; align-items: flex-start; }
+        .cv-actions { flex-wrap: wrap; }
+        .cv-viewer { height: 420px; }
+    }
 </style>
 
 <div class="cv-section">
@@ -200,30 +206,56 @@
         }
     }
 
-    // Easter egg
+    // Easter egg — only shown when CV section is in viewport
     var EGGS = [
         {icon: '\ud83d\udd75\ufe0f', msg: 'Still thinking it through?', sub: 'Downloading it is free, no worries.'},
         {icon: '\ud83d\udc40',       msg: 'Quick reminder', sub: 'The blue button downloads the resume in one click.'},
         {icon: '\ud83e\udd0c',       msg: 'Full review completed', sub: 'The PDF will stay available whenever you need it.'}
     ];
     var eggIdx = 0;
-
     var eggAutoHide = null;
+    var eggNextTimer = null;
+    var eggInView = false;
 
     function showEgg() {
+        if (!eggInView) return;
         var e = EGGS[eggIdx % EGGS.length];
         document.getElementById('egg-guy').textContent = e.icon;
         document.getElementById('egg-msg').textContent = e.msg;
         document.getElementById('egg-sub').textContent = e.sub;
         document.getElementById('egg').classList.add('show');
         eggIdx++;
-        if (eggAutoHide) { clearTimeout(eggAutoHide); }
+        if (eggAutoHide) clearTimeout(eggAutoHide);
         eggAutoHide = setTimeout(closeEgg, 8000);
     }
     function closeEgg() {
         if (eggAutoHide) { clearTimeout(eggAutoHide); eggAutoHide = null; }
         document.getElementById('egg').classList.remove('show');
-        setTimeout(showEgg, 30000);
+        if (eggInView) {
+            if (eggNextTimer) clearTimeout(eggNextTimer);
+            eggNextTimer = setTimeout(showEgg, 30000);
+        }
     }
-    setTimeout(showEgg, 8000);
+    function dismissEgg() {
+        if (eggAutoHide)  { clearTimeout(eggAutoHide);  eggAutoHide  = null; }
+        if (eggNextTimer) { clearTimeout(eggNextTimer); eggNextTimer = null; }
+        document.getElementById('egg').classList.remove('show');
+    }
+
+    var cvObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                eggInView = true;
+                if (!eggNextTimer && !eggAutoHide) {
+                    eggNextTimer = setTimeout(showEgg, 8000);
+                }
+            } else {
+                eggInView = false;
+                dismissEgg();
+            }
+        });
+    }, { threshold: 0.15 });
+
+    var cvSection = document.querySelector('.cv-section');
+    if (cvSection) cvObserver.observe(cvSection);
 </script>

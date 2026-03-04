@@ -80,6 +80,15 @@
         border-radius: 14px; padding: 16px;
         display: flex; align-items: center; gap: 12px;
     }
+    @media (max-width: 680px) {
+        .hero { min-height: auto; padding: 2.5rem 1.2rem 2rem; }
+        .hero-grid { grid-template-columns: 1fr; }
+        .right-col { display: none; }
+        .hero-title { font-size: 42px; letter-spacing: -1.5px; }
+        .hero-sub { font-size: 14px; }
+        .hero-btns { flex-wrap: wrap; }
+        .hero-btns a { padding: 11px 18px; font-size: 12.5px; }
+    }
 </style>
 
 <div class="hero">
@@ -96,11 +105,7 @@
                     Data<br><span class="accent">Engineer</span>
                 </h1>
                 <p class="hero-sub">
-                    De la construction d'applications logicielles à
-                    <strong>l'ingénierie des systèmes de données à grande échelle</strong>.
-                    Étudiant ingénieur à l'<strong>Efrei Paris</strong>, je transitionne
-                    vers le Mastère <strong>Data Engineering &amp; IA</strong> avec la
-                    rigueur d'un développeur et la vision d'un architecte data.
+Du développement web vers la Data. Étudiant à l'Efrei, je me spécialise en Data Engineering & IA pour mon Mastère.
                 </p>
                 <p class="hero-mono">// Mastère Data &amp; IA · Efrei Paris · 2026–2028</p>
                 <div class="hero-btns">

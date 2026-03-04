@@ -14,6 +14,16 @@
         width: 7px; height: 7px; border-radius: 50%;
         background: var(--accent); box-shadow: 0 0 10px var(--accent);
     }
+    .nav-lang {
+        display: flex; align-items: center; gap: 5px;
+        margin-left: 6px; padding-left: 10px;
+        border-left: 1px solid rgba(255,255,255,0.1);
+        font-size: 12px; font-weight: 700;
+    }
+    .nav-lang a { text-decoration: none; transition: color 0.2s; color: var(--muted); }
+    .nav-lang a:hover { color: var(--text) !important; }
+    .nav-lang a.lang-active { color: var(--accent-light); font-weight: 800; }
+    .nav-lang-sep { color: rgba(255,255,255,0.15); }
     .nav-links { display: flex; gap: 4px; align-items: center; }
     .nav-links a {
         padding: 6px 14px; border-radius: 999px;
@@ -27,10 +37,21 @@
         font-weight: 700 !important; font-size: 12px !important;
         box-shadow: 0 4px 16px rgba(37,99,235,0.35);
     }
+    @media (max-width: 680px) {
+        .navbar { padding: 0 1rem; }
+        .nav-links a:not(.nav-cta) { display: none; }
+    }
 </style>
 
 <div class="navbar">
-    <span class="nav-logo"><span class="dot"></span> Ibrahim K.</span>
+    <span class="nav-logo">
+        <span class="dot"></span> Ibrahim K.
+        <span class="nav-lang">
+            <a href="/?lang=en" class="$lang_en_class">EN</a>
+            <span class="nav-lang-sep">|</span>
+            <a href="/?lang=fr" class="$lang_fr_class">FR</a>
+        </span>
+    </span>
     <div class="nav-links">
         <a href="#home">Home</a>
         <a href="#skills">Skills</a>

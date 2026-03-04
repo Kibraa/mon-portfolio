@@ -70,13 +70,18 @@
         transition: all 0.2s;
     }
     .project-gh-link:hover { color: var(--text); border-color: rgba(255,255,255,0.22); }
+    @media (max-width: 680px) {
+        .projects-section { padding: 2.5rem 1.2rem; }
+        .project-grid { grid-template-columns: 1fr; }
+    }
 </style>
 
 <div class="projects-section">
     <div class="section-eyebrow">Selected Work</div>
     <div class="section-title">Flagship Projects</div>
     <div class="section-desc">
-        End-to-end architectures, from ingestion to visualization.
+        Here are a few mini-projects I completed independently to practice and prepare for my Master's degree in Data Engineering & AI.
+
     </div>
 
     <div class="project-grid">
@@ -136,16 +141,14 @@
                 <span class="badge-pipe">ETL Pipeline</span>
                 <h3>LogStream Architect</h3>
                 <p>
-                    Python ETL pipeline processing 500 fictional HTTP logs in batch.
-                    Strict validation (IP, timestamps, HTTP methods), severity
-                    enrichment with critical flags, and PostgreSQL 15 loading.
+                    Python-based ETL pipeline designed to process and clean server logs.
+                    The project focuses on ensuring structured data storage within a PostgreSQL database.
                 </p>
                 <div style="margin-bottom:12px;">
                     <span class="tag">Python</span>
                     <span class="tag">Pandas</span>
-                    <span class="tag">Docker</span>
                     <span class="tag">PostgreSQL</span>
-                    <span class="tag">psycopg2</span>
+                    <span class="tag">Docker</span>
                 </div>
                 <a href="https://github.com/Kibraa/LogStream-Architect" target="_blank" rel="noopener noreferrer" class="project-gh-link">
                     ↗ View on GitHub
@@ -163,17 +166,16 @@
                 <span class="badge-ai">Artificial Intelligence</span>
                 <h3>Semantic Brain</h3>
                 <p>
-                    Semantic search engine powered by Claude 3.5 API
-                    and a Pinecone vector database. Embedding indexing,
-                    RAG retrieval, and context-aware response generation.
+                    Document analysis tool using the Claude API for automated summaries and key insight extraction.
+                    This project explores AI integration and basic prompt management.
                 </p>
-                <div>
-                    <span class="tag">Claude API</span>
-                    <span class="tag">RAG</span>
-                    <span class="tag">Pinecone</span>
+                <div style="margin-bottom:12px;">
                     <span class="tag">Python</span>
-                    <span class="tag">FastAPI</span>
+                    <span class="tag">Claude API</span>
                 </div>
+                <a href="https://github.com/Kibraa/semantic-brain" target="_blank" rel="noopener noreferrer" class="project-gh-link">
+                    ↗ View on GitHub
+                </a>
             </div>
         </div>
 
@@ -187,16 +189,13 @@
                 <span class="badge-cloud">Cloud Monitoring</span>
                 <h3>Cloudify Analytics</h3>
                 <p>
-                    Cloud infrastructure performance monitoring dashboard.
-                    Containerized metric agents, real-time Plotly
-                    visualization, and threshold-based alerting.
+                    Monitoring dashboard for visualizing system metrics (CPU, RAM) via Plotly.
+                    A practical exercise in connecting a web interface to database data.
                 </p>
                 <div>
                     <span class="tag">Next.js</span>
-                    <span class="tag">Python</span>
-                    <span class="tag">Docker</span>
+                    <span class="tag">SQL</span>
                     <span class="tag">Plotly</span>
-                    <span class="tag">Supabase</span>
                 </div>
             </div>
         </div>

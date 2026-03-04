@@ -80,6 +80,15 @@
         border-radius: 14px; padding: 16px;
         display: flex; align-items: center; gap: 12px;
     }
+    @media (max-width: 680px) {
+        .hero { min-height: unset; padding: 2.5rem 1.2rem 2rem; }
+        .hero-grid { grid-template-columns: 1fr; }
+        .right-col { display: none; }
+        .hero-title { font-size: 42px; letter-spacing: -1.5px; }
+        .hero-sub { font-size: 14px; }
+        .hero-btns { flex-wrap: wrap; }
+        .hero-btns a { padding: 11px 18px; font-size: 12.5px; }
+    }
 </style>
 
 <div class="hero">
@@ -96,11 +105,7 @@
                     Data<br><span class="accent">Engineer</span>
                 </h1>
                 <p class="hero-sub">
-                    From building software applications to
-                    <strong>engineering large-scale data systems</strong>.
-                    Engineering student at <strong>Efrei Paris</strong>, transitioning
-                    toward a Master's in <strong>Data Engineering &amp; AI</strong> with the
-                    rigor of a developer and the vision of a data architect.
+                    From Web Development to Data. Student at Efrei Paris, currently specializing in Data Engineering & AI for my Master’s degree.
                 </p>
                 <p class="hero-mono">// Data &amp; AI Master's · Efrei Paris · 2026–2028</p>
                 <div class="hero-btns">

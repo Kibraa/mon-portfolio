@@ -69,6 +69,12 @@
         padding: 3px 0; display: flex; gap: 8px; align-items: flex-start;
     }
     .exp-bullets li span { color: var(--accent); margin-top: 2px; }
+    @media (max-width: 680px) {
+        .exp-section { padding: 2.5rem 1.2rem 2rem; }
+        .exp-details { grid-template-columns: 1fr; }
+        .exp-header { flex-direction: column; gap: 4px; }
+        .exp-card { padding: 18px; }
+    }
 </style>
 
 <div class="exp-section">

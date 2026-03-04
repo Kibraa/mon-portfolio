@@ -70,13 +70,17 @@
         transition: all 0.2s;
     }
     .project-gh-link:hover { color: var(--text); border-color: rgba(255,255,255,0.22); }
+    @media (max-width: 680px) {
+        .projects-section { padding: 2.5rem 1.2rem; }
+        .project-grid { grid-template-columns: 1fr; }
+    }
 </style>
 
 <div class="projects-section">
     <div class="section-eyebrow">Réalisations</div>
     <div class="section-title">Projets Piliers</div>
     <div class="section-desc">
-        Architectures complètes, de l'ingestion à la visualisation.
+        Voici quelques mini-projets réalisés en autonomie pour m'entraîner et préparer mon arrivée en Mastère Data Engineering & IA
     </div>
 
     <div class="project-grid">
@@ -136,16 +140,14 @@
                 <span class="badge-pipe">Pipeline ETL</span>
                 <h3>LogStream Architect</h3>
                 <p>
-                    Pipeline ETL Python traitant 500 logs HTTP fictifs en batch.
-                    Validation stricte (IP, horodatage, méthodes), enrichissement
-                    avec sévérité et flag critique, chargement PostgreSQL 15.
+                    Pipeline ETL développé en Python pour le traitement et le nettoyage de logs serveurs.
+                    L'objectif est d'assurer un stockage structuré au sein d'une base de données PostgreSQL.
                 </p>
                 <div style="margin-bottom:12px;">
                     <span class="tag">Python</span>
                     <span class="tag">Pandas</span>
-                    <span class="tag">Docker</span>
                     <span class="tag">PostgreSQL</span>
-                    <span class="tag">psycopg2</span>
+                    <span class="tag">Docker</span>
                 </div>
                 <a href="https://github.com/Kibraa/LogStream-Architect" target="_blank" rel="noopener noreferrer" class="project-gh-link">
                     ↗ Voir sur GitHub
@@ -163,17 +165,17 @@
                 <span class="badge-ai">Intelligence Artificielle</span>
                 <h3>Semantic Brain</h3>
                 <p>
-                    Moteur de recherche sémantique exploitant l'API Claude 3.5
-                    et une base vectorielle Pinecone. Indexation par embeddings,
-                    retrieval RAG et génération de réponses contextualisées.
+                    Outil d'analyse de documents utilisant l'API d'une IA pour la génération de résumés
+                    et l'extraction d'informations clés. Ce projet permet d'explorer l'intégration d'IA
+                    et la gestion de prompts.
                 </p>
-                <div>
-                    <span class="tag">Claude API</span>
-                    <span class="tag">RAG</span>
-                    <span class="tag">Pinecone</span>
+                <div style="margin-bottom:12px;">
                     <span class="tag">Python</span>
-                    <span class="tag">FastAPI</span>
+                    <span class="tag">Claude API</span>
                 </div>
+                <a href="https://github.com/Kibraa/semantic-brain" target="_blank" rel="noopener noreferrer" class="project-gh-link">
+                    ↗ Voir sur GitHub
+                </a>
             </div>
         </div>
 
@@ -187,16 +189,13 @@
                 <span class="badge-cloud">Cloud Monitoring</span>
                 <h3>Cloudify Analytics</h3>
                 <p>
-                    Dashboard de monitoring de performance d'infrastructure Cloud.
-                    Collecte de métriques via agents conteneurisés, visualisation
-                    Plotly temps réel et alerting par seuils dynamiques.
+                    Tableau de bord de monitoring pour visualiser des métriques système (CPU, RAM) via Plotly.
+                    Un exercice pratique pour lier une interface web à des données de base de données.
                 </p>
                 <div>
                     <span class="tag">Next.js</span>
-                    <span class="tag">Python</span>
-                    <span class="tag">Docker</span>
+                    <span class="tag">SQL</span>
                     <span class="tag">Plotly</span>
-                    <span class="tag">Supabase</span>
                 </div>
             </div>
         </div>
