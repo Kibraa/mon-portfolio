@@ -1,26 +1,3 @@
-"""
-╔══════════════════════════════════════════════════════════════╗
-║  Ibrahim KARAMANLIAN — Data Engineering & IA Portfolio       ║
-║  Stack: NiceGUI · Plotly · Python                            ║
-║  Deploy: python app.py                                       ║
-╠══════════════════════════════════════════════════════════════╣
-║  Architecture:                                               ║
-║    templates/base.css              → CSS partagé             ║
-║    templates/navbar.html           → barre de navigation     ║
-║    templates/hero.html             → section héro            ║
-║    templates/skills_header.html    → en-tête compétences     ║
-║    templates/projects.html         → projets piliers         ║
-║    templates/sankey_label.html     → label du diagramme      ║
-║    templates/experiences.html      → parcours professionnel  ║
-║    templates/alternance_header.html→ en-tête alternance      ║
-║    templates/alternance_banner.html→ bannière alternance     ║
-║    templates/contact.html          → contact + footer        ║
-║                                                              ║
-║  Variables CSS: syntaxe $var (string.Template)               ║
-║  → Aucune f-string, aucun {{ }}, VS Code 100% stable.       ║
-╚══════════════════════════════════════════════════════════════╝
-"""
-
 import base64
 import os
 from functools import lru_cache
@@ -28,15 +5,12 @@ from pathlib import Path
 from string import Template
 
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from fastapi import Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from nicegui import app as nicegui_app, ui
+from plotly.subplots import make_subplots
 
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# THEME — single source of truth
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 THEME = {
     "accent":       "#2563EB",
     "accent_light": "#60A5FA",
@@ -52,11 +26,10 @@ THEME = {
     "purple_light": "#C084FC",
 }
 
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# HELPERS
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+ASSETS_DIR    = Path(__file__).parent / "assets"
+
+nicegui_app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
 
 
 def _normalize_lang(value: str | None) -> str:
@@ -64,7 +37,6 @@ def _normalize_lang(value: str | None) -> str:
 
 
 def load(filename: str, lang: str | None = None) -> str:
-    """Lit un template avec fallback FR si la variante EN n'existe pas."""
     path = TEMPLATES_DIR / filename
     if _normalize_lang(lang) == "EN":
         en_path = path.with_name(f"{path.stem}_en{path.suffix}")
@@ -74,7 +46,6 @@ def load(filename: str, lang: str | None = None) -> str:
 
 
 def T(raw: str) -> str:
-    """Remplace les $variables par les valeurs du THEME."""
     return Template(raw).safe_substitute(THEME)
 
 
@@ -83,14 +54,9 @@ _BASE_CSS = T(load("base.css"))
 
 @lru_cache(maxsize=10)
 def _get_pdf_b64(filename: str) -> str:
-    """Lit un PDF depuis assets/ et le retourne en base64."""
-    path = Path(__file__).parent / "assets" / filename
-    return base64.b64encode(path.read_bytes()).decode()
+    return base64.b64encode((ASSETS_DIR / filename).read_bytes()).decode()
 
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# I18N
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 I18N = {
     "EN": {
         "radar_level":          "Level",
@@ -133,13 +99,9 @@ I18N = {
 }
 
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# PAGE BUILDER
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 def _build_page(lang: str) -> str:
     TXT = I18N[lang]
 
-    # ── Skills data ────────────────────────────────────────
     RADAR_CATEGORIES = [
         "Python", "SQL", "JavaScript",
         "React", "Next.js", "Node.js",
@@ -166,7 +128,6 @@ def _build_page(lang: str) -> str:
         _k_data: THEME["purple"],
     }
 
-    # ── Plotly charts — un seul figure avec make_subplots ──
     _cfg = {"displayModeBar": False, "responsive": True}
 
     fig_skills = make_subplots(
@@ -177,7 +138,6 @@ def _build_page(lang: str) -> str:
         subplot_titles=[TXT["radar_title"], TXT["bar_title"]],
     )
 
-    # Radar (col 1)
     fig_skills.add_trace(go.Scatterpolar(
         r=RADAR_VALUES + [RADAR_VALUES[0]],
         theta=RADAR_CATEGORIES + [RADAR_CATEGORIES[0]],
@@ -189,7 +149,6 @@ def _build_page(lang: str) -> str:
         showlegend=False,
     ), row=1, col=1)
 
-    # Barres horizontales (col 2) — un seul trace, couleur par groupe
     _bar_skills, _bar_values, _bar_colors = [], [], []
     for group_name, items in SKILL_GROUPS.items():
         for skill, value in items.items():
@@ -206,7 +165,6 @@ def _build_page(lang: str) -> str:
         showlegend=False,
     ), row=1, col=2)
 
-    # Traces vides pour la légende
     for group_name in SKILL_GROUPS:
         fig_skills.add_trace(go.Bar(
             y=[], x=[], name=group_name, orientation="h",
@@ -232,28 +190,26 @@ def _build_page(lang: str) -> str:
                 tickfont=dict(size=11, color=THEME["text"], family="Inter"),
             ),
         ),
-        # Axes du bar chart (col=2 → xaxis2 / yaxis2)
         xaxis2=dict(
             range=[0, 100],
             gridcolor="rgba(255,255,255,0.06)",
             tickfont=dict(color=THEME["muted"], size=10),
             zeroline=False,
-            fixedrange=True,   # désactive zoom/drag sur x
+            fixedrange=True,
         ),
         yaxis2=dict(
             autorange="reversed",
             tickfont=dict(color=THEME["text"], size=11),
             tickmode="linear",
             automargin=True,
-            fixedrange=True,   # désactive zoom/drag sur y
+            fixedrange=True,
         ),
-        dragmode=False,        # désactive le drag global
+        dragmode=False,
         legend=dict(
             orientation="h", y=-0.15, x=0.80, xanchor="center",
             font=dict(size=11, color=THEME["muted"]),
             bgcolor="rgba(0,0,0,0)",
         ),
-        # Ligne de séparation verticale
         shapes=[dict(
             type="line",
             xref="paper", yref="paper",
@@ -263,8 +219,10 @@ def _build_page(lang: str) -> str:
     )
     fig_skills.update_annotations(font_color=THEME["muted"], font_size=13)
 
-    _cfg_skills = {"displayModeBar": False, "responsive": True, "staticPlot": False}
-    skills_div = fig_skills.to_html(full_html=False, include_plotlyjs="cdn", config=_cfg_skills)
+    skills_div = fig_skills.to_html(
+        full_html=False, include_plotlyjs="cdn",
+        config={"displayModeBar": False, "responsive": True, "staticPlot": False},
+    )
 
     _sankey_roles = (
         ["User", "UI", "API", "Storage", "AI", "Infra"]
@@ -349,18 +307,15 @@ def _build_page(lang: str) -> str:
             font=dict(size=11, color=THEME["muted"]),
             bgcolor="rgba(0,0,0,0)",
         ),
-        annotations=[
-            dict(
-                x=TXT["alt_annotation_month"], y=107,
-                text=TXT["alt_annotation_text"],
-                showarrow=False,
-                font=dict(size=10, color=THEME["green"]),
-            ),
-        ],
+        annotations=[dict(
+            x=TXT["alt_annotation_month"], y=107,
+            text=TXT["alt_annotation_text"],
+            showarrow=False,
+            font=dict(size=10, color=THEME["green"]),
+        )],
     )
     alt_div = fig_alt.to_html(full_html=False, include_plotlyjs=False, config=_cfg)
 
-    # ── Load templates ──────────────────────────────────────
     def tpl(name: str, extra: dict | None = None) -> str:
         return Template(load(name, lang=lang)).safe_substitute({**THEME, **(extra or {})})
 
@@ -387,16 +342,13 @@ def _build_page(lang: str) -> str:
         "cv_download_name": contact_name,
     })
 
-
-    # ── Global overrides ────────────────────────────────────
     global_css = (
         "body,html{margin:0;padding:0;background:#0A0A0F;}"
         "::-webkit-scrollbar{width:5px;}"
         "::-webkit-scrollbar-track{background:#0A0A0F;}"
         "::-webkit-scrollbar-thumb{background:#2563EB;border-radius:3px;}"
         ".section-anchor{display:block;position:relative;top:-12px;visibility:hidden;height:0;}"
-        ".skills-wrap{background:#16161F;border-top:1px solid rgba(255,255,255,0.06);"
-        "padding:4rem 0 3.5rem;}"
+        ".skills-wrap{background:#16161F;border-top:1px solid rgba(255,255,255,0.06);padding:4rem 0 3.5rem;}"
         ".chart-wrap{width:100%;max-width:1200px;margin:2rem auto 0;padding:0 2.5rem;box-sizing:border-box;}"
         ".skills-disclaimer{text-align:center;color:#8b8fa8;font-size:0.79rem;font-style:italic;"
         "margin:1.8rem auto 0;max-width:700px;padding:1.1rem 2rem 0;"
@@ -407,7 +359,6 @@ def _build_page(lang: str) -> str:
 
     disclaimer_html = f'<p class="skills-disclaimer">{TXT["disclaimer"]}</p>'
 
-    # ── Assemble full page ──────────────────────────────────
     parts = [
         "<!DOCTYPE html>",
         f'<html lang="{lang.lower()}">',
@@ -415,6 +366,7 @@ def _build_page(lang: str) -> str:
         '<meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
         "<title>Ibrahim Karamanlian | Data Engineer</title>",
+        '<link rel="icon" type="image/png" href="/assets/MOI_Icon.png">',
         f"<style>{_BASE_CSS}</style>",
         f"<style>{global_css}</style>",
         "</head>",
@@ -450,21 +402,15 @@ def _build_page(lang: str) -> str:
     return "\n".join(parts)
 
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# ROUTE
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 @nicegui_app.get("/")
 async def index(request: Request):
     lang = "FR" if request.query_params.get("lang", "en").lower() == "fr" else "EN"
     return HTMLResponse(content=_build_page(lang))
 
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# RUN
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ui.run(
     title="Ibrahim Karamanlian | Data Engineer",
-    favicon="⚡",
+    favicon="/assets/MOI_Icon.png",
     host="0.0.0.0",
     port=int(os.environ.get("PORT", 8080)),
     dark=True,

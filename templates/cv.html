@@ -69,7 +69,6 @@
     }
     .cv-dl-secondary:hover { background: rgba(37,99,235,0.18); }
 
-    /* Easter egg */
     .egg {
         position: fixed; bottom: -200px; right: 20px;
         background: $card; border: 1px solid rgba(37,99,235,0.28);
@@ -117,7 +116,7 @@
             </div>
             <div class="cv-actions">
                 <a id="dl-fr" class="cv-dl cv-dl-primary" href="#" download="CV_Ibrahim_Karamanlian_FR.pdf">⬇ Télécharger CV FR</a>
-                <a id="dl-en" class="cv-dl cv-dl-secondary" href="#" download="CV_Ibrahim_Data.pdf">⬇ Download CV EN</a>
+                <a id="dl-en" class="cv-dl cv-dl-secondary" href="#" download="CV_Ibrahim_EN.pdf">⬇ Download CV EN</a>
             </div>
         </div>
 
@@ -187,14 +186,12 @@
         });
     }
 
-    // Build download hrefs from base64
     function makeDataHref(b64) {
         return 'data:application/pdf;base64,' + b64;
     }
     document.getElementById('dl-fr').href = makeDataHref(PDF_FR);
     document.getElementById('dl-en').href = makeDataHref(PDF_EN);
 
-    // Initial render — FR
     var loadingDiv = document.querySelector('#viewer-fr .cv-loading');
     renderPDF(PDF_FR, 'pages-fr', loadingDiv);
     loaded.fr = true;
@@ -210,7 +207,6 @@
         }
     }
 
-    // Easter egg — visible uniquement quand la section CV est dans le viewport
     var EGGS = [
         {icon: '\ud83d\udd75\ufe0f', msg: 'Toujours en train de r\u00e9fl\u00e9chir ?', sub: 'C\u2019est gratuit de le t\u00e9l\u00e9charger, tkt.'},
         {icon: '\ud83d\udc40',       msg: 'Petit rappel utile', sub: 'Le bouton bleu t\u00e9l\u00e9charge le CV en un clic.'},

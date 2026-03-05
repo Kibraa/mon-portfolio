@@ -70,7 +70,6 @@
     }
     .cv-dl-secondary:hover { background: rgba(37,99,235,0.18); }
 
-    /* Easter egg */
     .egg {
         position: fixed; bottom: -200px; right: 20px;
         background: $card; border: 1px solid rgba(37,99,235,0.28);
@@ -117,7 +116,7 @@
                 <button class="cv-tab"        id="tab-fr" onclick="showCV('fr')" type="button">🇫🇷 French</button>
             </div>
             <div class="cv-actions">
-                <a id="dl-en" class="cv-dl cv-dl-primary" href="#" download="CV_Ibrahim_Data.pdf">⬇ Download CV EN</a>
+                <a id="dl-en" class="cv-dl cv-dl-primary" href="#" download="CV_Ibrahim_EN.pdf">⬇ Download CV EN</a>
                 <a id="dl-fr" class="cv-dl cv-dl-secondary" href="#" download="CV_Ibrahim_Karamanlian_FR.pdf">⬇ Télécharger CV FR</a>
             </div>
         </div>
@@ -206,7 +205,6 @@
         }
     }
 
-    // Easter egg — only shown when CV section is in viewport
     var EGGS = [
         {icon: '\ud83d\udd75\ufe0f', msg: 'Still thinking it through?', sub: 'Downloading it is free, no worries.'},
         {icon: '\ud83d\udc40',       msg: 'Quick reminder', sub: 'The blue button downloads the resume in one click.'},
