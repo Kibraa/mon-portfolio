@@ -333,10 +333,10 @@ def _build_page(lang: str) -> str:
     alt_banner    = tpl("alternance_banner.html")
     cv            = tpl("cv.html", {
         "pdf_fr": _get_pdf_b64("CV_IBRAHIM_2026.pdf"),
-        "pdf_en": _get_pdf_b64("CV_Ibrahim_Data.pdf"),
+        "pdf_en": _get_pdf_b64("CV_Ibrahim_data_en.pdf"),
     })
-    contact_file  = "CV_Ibrahim_Data.pdf" if lang == "EN" else "CV_IBRAHIM_2026.pdf"
-    contact_name  = "CV_Ibrahim_Data.pdf" if lang == "EN" else "CV_Ibrahim_Karamanlian_FR.pdf"
+    contact_file  = "CV_Ibrahim_data_en.pdf" if lang == "EN" else "CV_IBRAHIM_2026.pdf"
+    contact_name  = "CV_Ibrahim_data_en.pdf" if lang == "EN" else "CV_Ibrahim_Karamanlian_FR.pdf"
     contact       = tpl("contact.html", {
         "cv_download_href": "data:application/pdf;base64," + _get_pdf_b64(contact_file),
         "cv_download_name": contact_name,
