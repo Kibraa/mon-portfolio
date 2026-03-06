@@ -135,7 +135,6 @@
 
 <div class="egg" id="egg">
     <button class="egg-close" onclick="closeEgg()">×</button>
-    <div class="egg-guy" id="egg-guy"></div>
     <div>
         <div class="egg-msg" id="egg-msg"></div>
         <div class="egg-sub" id="egg-sub"></div>
@@ -208,9 +207,9 @@
     }
 
     var EGGS = [
-        {icon: '\ud83d\udd75\ufe0f', msg: 'Toujours en train de r\u00e9fl\u00e9chir ?', sub: 'C\u2019est gratuit de le t\u00e9l\u00e9charger, tkt.'},
-        {icon: '\ud83d\udc40',       msg: 'Petit rappel utile', sub: 'Le bouton bleu t\u00e9l\u00e9charge le CV en un clic.'},
-        {icon: '\ud83e\udd0c',       msg: 'Lecture compl\u00e8te valid\u00e9e', sub: 'La version PDF reste dispo quand tu veux.'}
+        {msg: 'Toujours en train de r\u00e9fl\u00e9chir ?', sub: 'C\u2019est gratuit de le t\u00e9l\u00e9charger, tkt.'},
+        {msg: 'Petit rappel utile', sub: 'Le bouton bleu t\u00e9l\u00e9charge le CV en un clic.'},
+        {msg: 'Lecture compl\u00e8te valid\u00e9e', sub: 'La version PDF reste dispo quand tu veux.'}
     ];
     var eggIdx = 0;
     var eggAutoHide = null;
@@ -220,7 +219,6 @@
     function showEgg() {
         if (!eggInView) return;
         var e = EGGS[eggIdx % EGGS.length];
-        document.getElementById('egg-guy').textContent = e.icon;
         document.getElementById('egg-msg').textContent = e.msg;
         document.getElementById('egg-sub').textContent = e.sub;
         document.getElementById('egg').classList.add('show');
@@ -247,7 +245,7 @@
             if (entry.isIntersecting) {
                 eggInView = true;
                 if (!eggNextTimer && !eggAutoHide) {
-                    eggNextTimer = setTimeout(showEgg, 8000);
+                    eggNextTimer = setTimeout(showEgg, 30000);
                 }
             } else {
                 eggInView = false;

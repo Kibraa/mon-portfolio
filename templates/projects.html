@@ -86,53 +86,13 @@
     <div class="project-grid">
 
         <div class="project-card">
-            <div class="project-header"
-                 style="background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(16,185,129,0.01))">
-                <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg"
-                     style="width:calc(100% - 24px);position:relative;z-index:1">
-                    <rect x="6" y="6" width="288" height="118" rx="8"
-                          fill="none" stroke="rgba(22,163,74,0.2)" stroke-width="1.5" stroke-dasharray="6,3"/>
-                    <text x="13" y="20" fill="rgba(22,163,74,0.4)" font-size="8"
-                          font-family="monospace" font-weight="700">docker-compose</text>
-                    <rect x="16" y="30" width="78" height="72" rx="6"
-                          fill="rgba(16,185,129,0.07)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
-                    <text x="55" y="52" text-anchor="middle" fill="#10b981"
-                          font-size="8" font-weight="800" font-family="sans-serif">GENERATOR</text>
-                    <text x="55" y="67" text-anchor="middle" fill="rgba(255,255,255,0.42)"
-                          font-size="7" font-family="sans-serif">500 HTTP Logs</text>
-                    <text x="55" y="79" text-anchor="middle" fill="rgba(255,255,255,0.28)"
-                          font-size="6.5" font-family="sans-serif">JSON Lines</text>
-                    <text x="55" y="92" text-anchor="middle" fill="rgba(255,255,255,0.22)"
-                          font-size="6" font-family="monospace">generator.py</text>
-                    <path d="M96 66 L112 66" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round"/>
-                    <polygon points="112,62 120,66 112,70" fill="rgba(255,255,255,0.18)"/>
-                    <rect x="111" y="30" width="78" height="72" rx="6"
-                          fill="rgba(37,99,235,0.07)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
-                    <text x="150" y="52" text-anchor="middle" fill="#60a5fa"
-                          font-size="8" font-weight="800" font-family="sans-serif">PIPELINE</text>
-                    <text x="150" y="67" text-anchor="middle" fill="rgba(255,255,255,0.42)"
-                          font-size="7" font-family="sans-serif">Python · Pandas</text>
-                    <text x="150" y="79" text-anchor="middle" fill="rgba(255,255,255,0.28)"
-                          font-size="6.5" font-family="sans-serif">Clean · Enrich</text>
-                    <text x="150" y="92" text-anchor="middle" fill="rgba(255,255,255,0.22)"
-                          font-size="6" font-family="monospace">pipeline.py</text>
-                    <path d="M191 66 L207 66" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round"/>
-                    <polygon points="207,62 215,66 207,70" fill="rgba(255,255,255,0.18)"/>
-                    <rect x="206" y="30" width="78" height="72" rx="6"
-                          fill="rgba(245,158,11,0.07)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
-                    <text x="245" y="52" text-anchor="middle" fill="#f59e0b"
-                          font-size="8" font-weight="800" font-family="sans-serif">POSTGRES</text>
-                    <text x="245" y="67" text-anchor="middle" fill="rgba(255,255,255,0.42)"
-                          font-size="7" font-family="sans-serif">15 · psycopg2</text>
-                    <text x="245" y="79" text-anchor="middle" fill="rgba(255,255,255,0.28)"
-                          font-size="6.5" font-family="sans-serif">Indexed · Views</text>
-                    <text x="245" y="92" text-anchor="middle" fill="rgba(255,255,255,0.22)"
-                          font-size="6" font-family="monospace">init.sql</text>
-                </svg>
+            <div class="project-header" style="padding:0">
+                <img src="/assets/logs.webp" alt="LogStream Architect"
+                     style="width:100%;height:100%;object-fit:cover;">
             </div>
             <div class="project-body">
                 <span class="badge-pipe">Pipeline ETL</span>
-                <h3>LogStream Architect</h3>
+                <h3>Log-Processing-Pipeline</h3>
                 <p>
                     Pipeline ETL développé en Python pour le traitement et le nettoyage de logs serveurs.
                     L'objectif est d'assurer un stockage structuré au sein d'une base de données PostgreSQL.
@@ -150,13 +110,13 @@
         </div>
 
         <div class="project-card">
-            <div class="project-header"
-                 style="background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(168,85,247,0.01))">
-                <div class="project-icon">🧠</div>
+            <div class="project-header" style="padding:0">
+                <img src="/assets/document.jpg" alt="Semantic Brain"
+                     style="width:100%;height:100%;object-fit:cover;">
             </div>
             <div class="project-body">
                 <span class="badge-ai">Intelligence Artificielle</span>
-                <h3>Semantic Brain</h3>
+                <h3>Text-Analyzer</h3>
                 <p>
                     Outil d'analyse de documents utilisant l'API d'une IA pour la génération de résumés
                     et l'extraction d'informations clés. Ce projet permet d'explorer l'intégration d'IA
@@ -179,15 +139,16 @@
             </div>
             <div class="project-body">
                 <span class="badge-cloud">Cloud Monitoring</span>
-                <h3>Cloudify Analytics</h3>
+                <h3>Metric-Board</h3>
                 <p>
-                    Tableau de bord de monitoring pour visualiser des métriques système (CPU, RAM) via Plotly.
-                    Un exercice pratique pour lier une interface web à des données de base de données.
+                    Interface de monitoring permettant de suivre l'utilisation du processeur et de la mémoire en temps réel.
+                    Le projet s'appuie sur une base SQL pour le stockage des données et utilise Plotly pour générer des graphiques clairs sur l'état des ressources système.
                 </p>
                 <div>
                     <span class="tag">Next.js</span>
                     <span class="tag">SQL</span>
                     <span class="tag">Plotly</span>
+                    <span class="tag">Tailwind CSS</span>
                 </div>
             </div>
         </div>
