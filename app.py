@@ -172,10 +172,10 @@ def _build_page(lang: str) -> str:
         ), row=1, col=2)
 
     fig_skills.update_layout(
-        paper_bgcolor=THEME["card_alt"],
+        paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=34, r=40, t=74, b=116),
-        height=620,
+        margin=dict(l=34, r=40, t=64, b=80),
+        height=560,
         font=dict(family="Inter", color=THEME["text"], size=11),
         bargap=0.55,
         polar=dict(
@@ -343,18 +343,37 @@ def _build_page(lang: str) -> str:
     })
 
     global_css = (
-        "body,html{margin:0;padding:0;background:#0A0A0F;}"
+        "body,html{margin:0;padding:0;}"
+        "body{"
+        "background-color:var(--bg);"
+        "background-image:"
+        "linear-gradient(var(--rect-line) 1px,transparent 1px),"
+        "linear-gradient(90deg,var(--rect-line) 1px,transparent 1px),"
+        "linear-gradient(var(--rect-line-bold) 1px,transparent 1px),"
+        "linear-gradient(90deg,var(--rect-line-bold) 1px,transparent 1px);"
+        "background-size:60px 60px,60px 60px,300px 300px,300px 300px;"
+        "background-attachment:fixed;}"
         "::-webkit-scrollbar{width:5px;}"
-        "::-webkit-scrollbar-track{background:#0A0A0F;}"
+        "::-webkit-scrollbar-track{background:var(--bg);}"
         "::-webkit-scrollbar-thumb{background:#2563EB;border-radius:3px;}"
         ".section-anchor{display:block;position:relative;top:-12px;visibility:hidden;height:0;}"
-        ".skills-wrap{background:#16161F;border-top:1px solid rgba(255,255,255,0.06);padding:4rem 0 3.5rem;}"
-        ".chart-wrap{width:100%;max-width:1200px;margin:2rem auto 0;padding:0 2.5rem;box-sizing:border-box;}"
-        ".skills-disclaimer{text-align:center;color:#8b8fa8;font-size:0.79rem;font-style:italic;"
-        "margin:1.8rem auto 0;max-width:700px;padding:1.1rem 2rem 0;"
-        "border-top:1px solid rgba(255,255,255,0.08);font-family:Inter,sans-serif;line-height:1.6;}"
+        ".navbar{background:var(--navbar-bg)!important;}"
+        "[data-theme='light'] .navbar{border-bottom-color:rgba(0,0,0,0.07)!important;}"
+        "[data-theme='light'] .nav-lang{border-left-color:rgba(0,0,0,0.12)!important;}"
+        "[data-theme='light'] .nav-lang-sep{color:rgba(0,0,0,0.2)!important;}"
+        "[data-theme='light'] .nav-links a:hover{background:rgba(0,0,0,0.05)!important;}"
+        ".skills-wrap{background:var(--card-alt);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 0 3rem;}"
+        ".chart-wrap{width:100%;max-width:1200px;margin:1.5rem auto 0;padding:0 2.5rem;box-sizing:border-box;}"
+        ".chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}"
+        ".skills-disclaimer{text-align:center;color:var(--muted);font-size:0.79rem;font-style:italic;"
+        "margin:1.6rem auto 0;max-width:700px;padding:1rem 2rem 0;"
+        "border-top:1px solid var(--border);font-family:'Space Grotesk',sans-serif;line-height:1.6;}"
         ".js-plotly-plot .plotly .modebar{display:none!important;}"
-        "@media(max-width:680px){.chart-wrap{padding:0 1.2rem;margin-top:1.5rem;}}"
+        ".theme-toggle{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);"
+        "background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+        "color:var(--muted);transition:all 0.2s;font-size:15px;margin-right:4px;padding:0;}"
+        ".theme-toggle:hover{color:var(--text);border-color:var(--accent);}"
+        "@media(max-width:680px){.chart-wrap{padding:0 1.2rem;margin-top:1.2rem;}.theme-toggle{display:none;}}"
     )
 
     disclaimer_html = f'<p class="skills-disclaimer">{TXT["disclaimer"]}</p>'
@@ -366,6 +385,7 @@ def _build_page(lang: str) -> str:
         '<meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
         "<title>Ibrahim Karamanlian | Data Engineer</title>",
+        '<script>!function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)}();</script>',
         '<link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-icon-57x57.png">',
         '<link rel="apple-touch-icon" sizes="60x60" href="/assets/apple-icon-60x60.png">',
         '<link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-icon-72x72.png">',
@@ -394,7 +414,9 @@ def _build_page(lang: str) -> str:
         '<div class="skills-wrap">',
         skills_header,
         '<div class="chart-wrap">',
+        '<div class="chart-card">',
         skills_div,
+        '</div>',
         '</div>',
         disclaimer_html,
         "</div>",
@@ -412,6 +434,19 @@ def _build_page(lang: str) -> str:
         cv,
         '<span id="contact" class="section-anchor"></span>',
         contact,
+        "<script>",
+        "function toggleTheme(){",
+        "  var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';",
+        "  document.documentElement.setAttribute('data-theme',t);",
+        "  localStorage.setItem('theme',t);",
+        "  var b=document.getElementById('theme-btn');",
+        "  if(b)b.textContent=t==='dark'?'◑':'◐';",
+        "}",
+        "document.addEventListener('DOMContentLoaded',function(){",
+        "  var b=document.getElementById('theme-btn');",
+        "  if(b){var t=localStorage.getItem('theme')||'dark';b.textContent=t==='dark'?'◑':'◐';}",
+        "});",
+        "</script>",
         "</body>",
         "</html>",
     ]

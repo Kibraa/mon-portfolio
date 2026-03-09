@@ -4,7 +4,7 @@
               $text, $muted, $border, $green, $amber, $purple, $purple_light
    ═══════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
     --accent: $accent;
@@ -15,6 +15,21 @@
     --text: $text;
     --muted: $muted;
     --border: $border;
+    --rect-line: rgba(255,255,255,0.025);
+    --rect-line-bold: rgba(255,255,255,0.055);
+    --navbar-bg: rgba(10,10,15,0.92);
+}
+
+[data-theme="light"] {
+    --bg: #F5F5FA;
+    --card: #FFFFFF;
+    --card-alt: #EAEAF2;
+    --text: #0F0F1A;
+    --muted: #5A5A72;
+    --border: rgba(0,0,0,0.08);
+    --rect-line: rgba(0,0,0,0.04);
+    --rect-line-bold: rgba(0,0,0,0.08);
+    --navbar-bg: rgba(245,245,250,0.92);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,7 +37,7 @@
 body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
