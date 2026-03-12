@@ -71,7 +71,7 @@ I18N = {
         "alt_school":           "School",
         "alt_time_axis":        "% of time",
         "alt_annotation_month": "Apr",
-        "alt_annotation_text":  "🟢 100% company from April",
+        "alt_annotation_text":  "100% company from April",
         "disclaimer": (
             "These scores reflect my own honest assessment"
             " — rated on a scale of 0 to 100 based on my experience."
@@ -90,7 +90,7 @@ I18N = {
         "alt_school":           "École",
         "alt_time_axis":        "% du temps",
         "alt_annotation_month": "Avr",
-        "alt_annotation_text":  "🟢 100% entreprise dès avril",
+        "alt_annotation_text":  "100% entreprise dès avril",
         "disclaimer": (
             "Ces scores reflètent mon auto-évaluation honnête"
             " — notés sur une échelle de 0 à 100 selon mon expérience."
@@ -334,10 +334,10 @@ def _build_page(lang: str) -> str:
     alt_header    = tpl("alternance_header.html")
     alt_banner    = tpl("alternance_banner.html")
     cv            = tpl("cv.html", {
-        "pdf_fr": _get_pdf_b64("CV_IBRAHIM_2026.pdf"),
+        "pdf_fr": _get_pdf_b64("CV_FR_PRINCIPAL.pdf"),
         "pdf_en": _get_pdf_b64("CV_Ibrahim_Kara_en.pdf"),
     })
-    contact_file  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_IBRAHIM_2026.pdf"
+    contact_file  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_FR_PRINCIPAL.pdf"
     contact_name  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_Ibrahim_Karamanlian_FR.pdf"
     contact       = tpl("contact.html", {
         "cv_download_href": "data:application/pdf;base64," + _get_pdf_b64(contact_file),
