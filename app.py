@@ -174,9 +174,9 @@ def _build_page(lang: str) -> str:
     fig_skills.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=34, r=40, t=64, b=80),
-        height=560,
-        font=dict(family="Inter", color=THEME["text"], size=11),
+        margin=dict(l=20, r=20, t=60, b=70),
+        height=520,
+        font=dict(family="Space Grotesk", color="#8888A0", size=11),
         bargap=0.55,
         polar=dict(
             bgcolor="rgba(0,0,0,0)",
@@ -264,15 +264,15 @@ def _build_page(lang: str) -> str:
     fig_sankey.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter", color=THEME["text"], size=12),
+        font=dict(family="Space Grotesk", color="#8888A0", size=12),
         margin=dict(l=20, r=20, t=10, b=10),
         height=200,
     )
     sankey_div = fig_sankey.to_html(full_html=False, include_plotlyjs=False, config=_cfg)
 
     MONTHS     = TXT["alt_months"]
-    ENTREPRISE = [60, 60, 60, 60, 60, 60, 60, 100, 100, 100, 100, 100, 100]
-    ECOLE      = [40, 40, 40, 40, 40, 40, 40,   0,   0,   0,   0,   0,   0]
+    ENTREPRISE = [33, 33, 33, 33, 33, 33, 33, 100, 100, 100, 100, 100, 100]
+    ECOLE      = [67, 67, 67, 67, 67, 67, 67,   0,   0,   0,   0,   0,   0]
     fig_alt = go.Figure()
     fig_alt.add_trace(go.Bar(
         x=MONTHS, y=ENTREPRISE, name=TXT["alt_company"],
@@ -325,8 +325,10 @@ def _build_page(lang: str) -> str:
     }
     navbar        = tpl("navbar.html", _lang_vars)
     hero          = tpl("hero.html")
+    presentation  = tpl("presentation.html")
     skills_header = tpl("skills_header.html")
-    projects      = tpl("projects.html")
+    projects         = tpl("projects.html")
+    personal_projects = tpl("personal_projects.html")
     sankey_label  = tpl("sankey_label.html")
     experiences   = tpl("experiences.html")
     alt_header    = tpl("alternance_header.html")
@@ -364,7 +366,11 @@ def _build_page(lang: str) -> str:
         "[data-theme='light'] .nav-links a:hover{background:rgba(0,0,0,0.05)!important;}"
         ".skills-wrap{background:var(--card-alt);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 0 3rem;}"
         ".chart-wrap{width:100%;max-width:1200px;margin:1.5rem auto 0;padding:0 2.5rem;box-sizing:border-box;}"
-        ".chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}"
+        "[data-theme='light'] .js-plotly-plot svg text{fill:#2d2d3a!important;}"
+        "[data-theme='light'] .js-plotly-plot .gridlayer path{stroke:rgba(0,0,0,0.09)!important;}"
+        "[data-theme='light'] .js-plotly-plot .angularaxis .angulartick text{fill:#2d2d3a!important;}"
+        "[data-theme='light'] .js-plotly-plot .radialaxis line{stroke:rgba(0,0,0,0.09)!important;}"
+        "[data-theme='light'] .js-plotly-plot .angular-line{stroke:rgba(0,0,0,0.12)!important;}"
         ".skills-disclaimer{text-align:center;color:var(--muted);font-size:0.79rem;font-style:italic;"
         "margin:1.6rem auto 0;max-width:700px;padding:1rem 2rem 0;"
         "border-top:1px solid var(--border);font-family:'Space Grotesk',sans-serif;line-height:1.6;}"
@@ -373,7 +379,15 @@ def _build_page(lang: str) -> str:
         "background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;"
         "color:var(--muted);transition:all 0.2s;font-size:15px;margin-right:4px;padding:0;}"
         ".theme-toggle:hover{color:var(--text);border-color:var(--accent);}"
-        "@media(max-width:680px){.chart-wrap{padding:0 1.2rem;margin-top:1.2rem;}.theme-toggle{display:none;}}"
+        "@media(max-width:680px){"
+        ".chart-wrap{padding:0;margin-top:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;}"
+        ".chart-wrap .js-plotly-plot{min-width:620px;}"
+        ".skills-wrap{padding:2.5rem 0 2rem;}"
+        ".skills-disclaimer{margin:1.2rem 1.2rem 0;padding:0.8rem 1rem 0;font-size:0.75rem;}"
+        ".theme-toggle{display:none;}"
+        ".section-title{font-size:clamp(26px,7vw,40px)!important;}"
+        ".section-desc{font-size:13px!important;}"
+        "}"
     )
 
     disclaimer_html = f'<p class="skills-disclaimer">{TXT["disclaimer"]}</p>'
@@ -410,18 +424,18 @@ def _build_page(lang: str) -> str:
         navbar,
         '<span id="home" class="section-anchor"></span>',
         hero,
+        presentation,
         '<span id="skills" class="section-anchor"></span>',
         '<div class="skills-wrap">',
         skills_header,
         '<div class="chart-wrap">',
-        '<div class="chart-card">',
         skills_div,
-        '</div>',
         '</div>',
         disclaimer_html,
         "</div>",
         '<span id="projects" class="section-anchor"></span>',
         projects,
+        personal_projects,
         sankey_label,
         f'<div class="chart-wrap">{sankey_div}</div>',
         '<span id="experience" class="section-anchor"></span>',
