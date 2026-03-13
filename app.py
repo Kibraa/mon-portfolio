@@ -338,7 +338,7 @@ def _build_page(lang: str) -> str:
         "pdf_en": _get_pdf_b64("CV_Ibrahim_Kara_en.pdf"),
     })
     contact_file  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_FR_PRINCIPAL.pdf"
-    contact_name  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_Ibrahim_Karamanlian_FR.pdf"
+    contact_name  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_FR_PRINCIPAL.pdf"
     contact       = tpl("contact.html", {
         "cv_download_href": "data:application/pdf;base64," + _get_pdf_b64(contact_file),
         "cv_download_name": contact_name,
