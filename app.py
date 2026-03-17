@@ -556,10 +556,14 @@ def _build_page(lang: str) -> str:
     alt_ttl  = "Alternance 24 mois" if fr else "24-Month Apprenticeship"
     alt_head = "Disponible en alternance · Septembre 2026" if fr else "Open for Apprenticeship · September 2026"
     alt_sub  = "Mastère Data Engineering & IA · Efrei Paris" if fr else "Data Engineering &amp; AI Master's · Efrei Paris"
-    alt_rhy  = (
-        "Rythme : 2 semaines école / 1 semaine entreprise → 100% entreprise dès avril 2027"
+    alt_body = (
+        "Je recherche une <strong>alternance de 24 mois</strong> dans le domaine du <strong>développement fullstack</strong>. "
+        "Motivé, curieux et à l'aise aussi bien côté front que back, je cherche à contribuer à des projets concrets "
+        "tout en continuant à progresser."
     ) if fr else (
-        "Schedule: 2 weeks school / 1 week company → 100% company from April 2027"
+        "I am looking for a <strong>24-month work-study contract</strong> in <strong>fullstack development</strong>. "
+        "Motivated and comfortable on both front-end and back-end, I want to contribute to real projects "
+        "while continuing to grow."
     )
 
     # ── Contact ───────────────────────────────────────────────────────────────
@@ -664,26 +668,33 @@ def _build_page(lang: str) -> str:
         '<span class="tag ta">JavaScript</span>'
         '<span class="tag ta">TypeScript</span>'
         '<span class="tag ta">SQL</span>'
+        '<span class="tag ta">PHP</span>'
+        '<span class="tag ta">HTML / CSS</span>'
         '</div></div>\n'
         '      <div><div class="sg-lbl">Frameworks &amp; Libs</div><div class="tags">'
         '<span class="tag tg">React</span>'
         '<span class="tag tg">Next.js</span>'
         '<span class="tag tg">Vue.js</span>'
         '<span class="tag tg">Node.js</span>'
+        '<span class="tag tg">Express.js</span>'
+        '<span class="tag tg">FastAPI</span>'
         '<span class="tag tg">Tailwind CSS</span>'
         '<span class="tag tg">Symfony</span>'
         '</div></div>\n'
-        '      <div><div class="sg-lbl">Infra &amp; Ops</div><div class="tags">'
+        '      <div><div class="sg-lbl">Infra &amp; Outils</div><div class="tags">'
         '<span class="tag tm">Docker</span>'
         '<span class="tag tm">PostgreSQL</span>'
+        '<span class="tag tm">MySQL</span>'
+        '<span class="tag tm">MongoDB</span>'
         '<span class="tag tm">Supabase</span>'
-        '<span class="tag tm">Git</span>'
+        '<span class="tag tm">Git / GitHub</span>'
+        '<span class="tag tm">GitHub Actions</span>'
         '<span class="tag tm">REST API</span>'
+        '<span class="tag tm">Postman</span>'
         '</div></div>\n'
         f'      <div><div class="sg-lbl">{sk_data}</div><div class="tags">'
         '<span class="tag tp">ETL / Pipelines</span>'
-        '<span class="tag tp">Pandas</span>'
-        '<span class="tag tp">LLMs</span>'
+                '<span class="tag tp">LLMs</span>'
         '<span class="tag tp">Prompt Engineering</span>'
         '</div></div>\n'
         '    </div>\n'
@@ -729,6 +740,7 @@ def _build_page(lang: str) -> str:
         '        <div class="pt">Log-Processing-Pipeline</div>\n'
         f'        <div class="pd">{p1d}</div>\n'
         '        <div class="ps">Python · Pandas · PostgreSQL · Docker</div>\n'
+        '        <div style="margin-top:8px;font-size:10.5px;color:var(--muted);opacity:0.55;letter-spacing:0.04em;">réalisé avec Claude</div>\n'
         '        <a href="https://github.com/Kibraa/LogStream-Architect" target="_blank" class="pl">↗ GitHub</a>\n'
         '      </div>\n'
         '      <div class="pc">\n'
@@ -736,6 +748,7 @@ def _build_page(lang: str) -> str:
         '        <div class="pt">Text-Analyzer</div>\n'
         f'        <div class="pd">{p2d}</div>\n'
         '        <div class="ps">Python · LLM API</div>\n'
+        '        <div style="margin-top:8px;font-size:10.5px;color:var(--muted);opacity:0.55;letter-spacing:0.04em;">réalisé avec Claude</div>\n'
         '        <a href="https://github.com/Kibraa/semantic-brain" target="_blank" class="pl">↗ GitHub</a>\n'
         '      </div>\n'
         '      <div class="pc">\n'
@@ -743,6 +756,7 @@ def _build_page(lang: str) -> str:
         '        <div class="pt">Metric-Board</div>\n'
         f'        <div class="pd">{p3d}</div>\n'
         '        <div class="ps">Next.js · SQL · Plotly · Tailwind</div>\n'
+        '        <div style="margin-top:8px;font-size:10.5px;color:var(--muted);opacity:0.55;letter-spacing:0.04em;">réalisé avec Claude</div>\n'
         '        <a href="https://github.com/Kibraa/Metric-Board" target="_blank" class="pl">↗ GitHub</a>\n'
         '      </div>\n'
         '      <div class="pc">\n'
@@ -760,7 +774,8 @@ def _build_page(lang: str) -> str:
         f'    <h2 class="ttl">{alt_ttl}</h2>\n'
         '    <div class="callout">\n'
         f'      <div class="callout-t">{alt_head}</div>\n'
-        f'      <div class="callout-s"><strong>{alt_sub}</strong><br>{alt_rhy}</div>\n'
+        f'      <div class="callout-s" style="margin-top:6px;font-size:12px;color:var(--muted);opacity:0.7;">{alt_sub}</div>\n'
+        f'      <div class="callout-s" style="margin-top:10px;">{alt_body}</div>\n'
         '    </div>\n'
     )
 
