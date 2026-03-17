@@ -2,54 +2,14 @@ import base64
 import os
 from functools import lru_cache
 from pathlib import Path
-from string import Template
 
-import plotly.graph_objects as go
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from nicegui import app as nicegui_app, ui
-from plotly.subplots import make_subplots
 
-THEME = {
-    "accent":       "#2563EB",
-    "accent_light": "#60A5FA",
-    "bg":           "#0A0A0F",
-    "card":         "#111118",
-    "card_alt":     "#16161F",
-    "text":         "#F0F0F5",
-    "muted":        "#6B6B80",
-    "border":       "rgba(255,255,255,0.06)",
-    "green":        "#10B981",
-    "amber":        "#F59E0B",
-    "purple":       "#A855F7",
-    "purple_light": "#C084FC",
-}
-
-TEMPLATES_DIR = Path(__file__).parent / "templates"
-ASSETS_DIR    = Path(__file__).parent / "assets"
-
+ASSETS_DIR = Path(__file__).parent / "assets"
 nicegui_app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
-
-
-def _normalize_lang(value: str | None) -> str:
-    return "FR" if str(value).lower() == "fr" else "EN"
-
-
-def load(filename: str, lang: str | None = None) -> str:
-    path = TEMPLATES_DIR / filename
-    if _normalize_lang(lang) == "EN":
-        en_path = path.with_name(f"{path.stem}_en{path.suffix}")
-        if en_path.exists():
-            path = en_path
-    return path.read_text(encoding="utf-8")
-
-
-def T(raw: str) -> str:
-    return Template(raw).safe_substitute(THEME)
-
-
-_BASE_CSS = T(load("base.css"))
 
 
 @lru_cache(maxsize=10)
@@ -57,414 +17,927 @@ def _get_pdf_b64(filename: str) -> str:
     return base64.b64encode((ASSETS_DIR / filename).read_bytes()).decode()
 
 
-I18N = {
-    "EN": {
-        "radar_level":          "Level",
-        "radar_title":          "Overview",
-        "bar_title":            "By Domain",
-        "alt_months": [
-            "Sep 26", "Oct", "Nov", "Dec", "Jan 27",
-            "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep 27",
-        ],
-        "alt_company":          "Company",
-        "alt_school":           "School",
-        "alt_time_axis":        "% of time",
-        "alt_annotation_month": "Apr",
-        "alt_annotation_text":  "100% company from April",
-        "disclaimer": (
-            "These scores reflect my own honest assessment"
-            " — rated on a scale of 0 to 100 based on my experience."
-        ),
-    },
-    "FR": {
-        "radar_level":          "Niveau",
-        "radar_title":          "Vue d'ensemble",
-        "bar_title":            "Par domaine",
-        "alt_months": [
-            "Sept 26", "Oct", "Nov", "Déc", "Jan 27",
-            "Fév", "Mar", "Avr", "Mai", "Juin",
-            "Juil", "Août", "Sept 27",
-        ],
-        "alt_company":          "Entreprise",
-        "alt_school":           "École",
-        "alt_time_axis":        "% du temps",
-        "alt_annotation_month": "Avr",
-        "alt_annotation_text":  "100% entreprise dès avril",
-        "disclaimer": (
-            "Ces scores reflètent mon auto-évaluation honnête"
-            " — notés sur une échelle de 0 à 100 selon mon expérience."
-        ),
-    },
+# ── CSS ───────────────────────────────────────────────────────────────────────
+# Place your background image at assets/bg.jpg (or change the URL below)
+_CSS = """
+:root {
+    --bg:#050c14;
+    --card:#081320;
+    --text:#ffffff;
+    --muted:rgba(255,255,255,0.55);
+    --border:hsla(0,0%,100%,0.18);
+    --accent:#7eb8d4;
+    --green:#6ecf97;
+    --amber:#e8c87a;
+    --purple:#b89fe8;
 }
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html {
+    scroll-behavior:smooth;
+    scroll-padding-top:56px;
+}
+body {
+    color:var(--text);
+    background-color:var(--bg);
+    background-image:
+        radial-gradient(ellipse 100% 70% at 0% 100%, rgba(25,70,190,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(100,165,225,0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 55% 45% at 80% 85%, rgba(15,50,130,0.13) 0%, transparent 55%);
+    font-family:'Source Sans 3','Source Sans Pro',sans-serif;
+    font-weight:300;
+    font-size:16px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+}
+body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px);
+    background-size:72px 72px;
+    pointer-events:none;
+    z-index:0;
+    mask-image:radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%);
+    -webkit-mask-image:radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%);
+}
+a { color:inherit; text-decoration:none; }
+.w { max-width:55em; margin:0 auto; padding:0 2rem; }
+
+/* ── Navbar ─────────────────────────────────────────────────────── */
+.nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:rgba(8,19,32,0.95);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+    height:3.5em;
+}
+.nav-i {
+    max-width:55em; margin:0 auto; padding:0 2rem;
+    height:100%; display:flex; align-items:center; justify-content:space-between;
+}
+.nav-logo {
+    font-family:'Raleway',sans-serif; font-weight:700;
+    font-size:13px; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--text);
+}
+.nav-links { display:flex; list-style:none; gap:0; }
+.nav-links a {
+    padding:0 0.9em; font-family:'Raleway',sans-serif;
+    font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--muted); transition:color 0.2s;
+}
+.nav-links a:hover { color:var(--text); }
+.nav-r { display:flex; align-items:center; gap:10px; }
+.nav-lang {
+    font-family:'Raleway',sans-serif;
+    font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--muted); padding:5px 12px;
+    border:1px solid var(--border);
+    border-radius:3px; transition:all 0.2s;
+}
+.nav-lang:hover { color:var(--text); border-color:rgba(255,255,255,0.4); }
+.theme-btn {
+    width:30px; height:30px;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent; border:1px solid var(--border);
+    border-radius:3px; cursor:pointer; color:var(--muted);
+    font-size:13px; transition:all 0.2s;
+}
+.theme-btn:hover { color:var(--text); border-color:rgba(255,255,255,0.4); }
+
+/* ── Hero (100vh – pure CSS background, no image) ───────────────── */
+.hero-image {
+    height:100vh;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+.hero-image::before {
+    content:'';
+    position:absolute;
+    width:min(600px, 80vw); height:min(600px, 80vw);
+    background:radial-gradient(circle, rgba(37,100,220,0.13) 0%, rgba(100,165,225,0.06) 40%, transparent 70%);
+    border-radius:50%;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    animation:bloat 7s ease-in-out infinite;
+    pointer-events:none;
+}
+.hero-image::after {
+    content:'';
+    position:absolute;
+    width:min(300px, 45vw); height:min(300px, 45vw);
+    background:radial-gradient(circle, rgba(126,184,212,0.09) 0%, transparent 65%);
+    border-radius:50%;
+    top:35%; left:60%;
+    animation:drift 11s ease-in-out infinite;
+    pointer-events:none;
+}
+@keyframes bloat {
+    0%,100% { transform:translate(-50%,-50%) scale(1); opacity:1; }
+    50% { transform:translate(-50%,-54%) scale(1.12); opacity:0.7; }
+}
+@keyframes drift {
+    0%,100% { transform:translate(0,0) scale(1); opacity:0.8; }
+    33% { transform:translate(-30px, 20px) scale(1.08); }
+    66% { transform:translate(20px,-15px) scale(0.95); opacity:1; }
+}
+.hero-label {
+    position:absolute;
+    bottom:2.5em; left:50%;
+    transform:translateX(-50%);
+    font-family:'Raleway',sans-serif;
+    font-size:9px; font-weight:700;
+    letter-spacing:0.25em; text-transform:uppercase;
+    color:rgba(255,255,255,0.25);
+    display:flex; align-items:center; gap:10px;
+}
+.hero-label::before,.hero-label::after {
+    content:''; width:40px; height:1px;
+    background:rgba(255,255,255,0.15);
+}
+.scroll-arrow {
+    position:absolute;
+    bottom:1.8em; left:50%;
+    transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    animation:arrowbob 2.2s ease-in-out infinite;
+    pointer-events:none;
+}
+.scroll-arrow span {
+    display:block; width:10px; height:10px;
+    border-right:1px solid rgba(255,255,255,0.3);
+    border-bottom:1px solid rgba(255,255,255,0.3);
+    transform:rotate(45deg);
+}
+@keyframes arrowbob {
+    0%,100% { transform:translateX(-50%) translateY(0); opacity:0.5; }
+    50% { transform:translateX(-50%) translateY(6px); opacity:1; }
+}
+
+/* ── Bottom image reveal ────────────────────────────────────────── */
+.bottom-reveal { height:50vh; }
+
+/* ── Intro section ──────────────────────────────────────────────── */
+.intro-sec {
+    background:var(--bg);
+    padding:6em 0 5em;
+}
+.badge {
+    display:inline-flex; align-items:center; gap:8px;
+    margin-bottom:2em;
+    font-family:'Raleway',sans-serif; font-size:10px; font-weight:700;
+    letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:6px 16px; border-radius:3px;
+}
+.pulse {
+    width:6px; height:6px; border-radius:50%;
+    background:var(--green); animation:pulse 2s infinite; flex-shrink:0;
+}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+.h-name {
+    font-family:'Raleway',sans-serif;
+    font-size:clamp(2.4rem,7vw,4.5rem); font-weight:700;
+    letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--text); line-height:1.1; margin-bottom:0.4em;
+}
+.h-role {
+    font-family:'Raleway',sans-serif;
+    font-size:clamp(1rem,2.5vw,1.3rem); font-weight:400;
+    letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:1.6em;
+    border-top:1px solid var(--border); padding-top:1em;
+}
+.h-desc {
+    font-size:15px; color:var(--muted); font-weight:300;
+    line-height:1.8; max-width:34em; margin-bottom:2.2em;
+}
+.btns { display:flex; gap:12px; flex-wrap:wrap; }
+.btn {
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Raleway',sans-serif; font-size:10.5px; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase;
+    padding:0 2em; height:3em; border-radius:3px;
+    border:1px solid var(--border); cursor:pointer;
+    transition:all 0.2s; text-decoration:none;
+}
+.btn-p { background:rgba(255,255,255,0.08); color:var(--text); border-color:var(--border); }
+.btn-p:hover { background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.5); }
+.btn-g { background:transparent; color:var(--muted); border-color:var(--border); }
+.btn-g:hover { color:var(--text); border-color:rgba(255,255,255,0.4); }
+
+/* ── Sections rectangulaires ────────────────────────────────────── */
+.sec {
+    background:var(--bg);
+    padding:5em 0;
+    border-top:1px solid var(--border);
+}
+
+/* ── Section text hierarchy ─────────────────────────────────────── */
+.lbl {
+    font-family:'Raleway',sans-serif;
+    font-size:9.5px; letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:0.6em;
+}
+.ttl {
+    font-family:'Raleway',sans-serif;
+    font-size:clamp(1.5rem,3.5vw,2rem); font-weight:700;
+    letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--text); margin-bottom:1.8em;
+    padding-bottom:0.8em;
+    border-bottom:1px solid var(--border);
+}
+.dsc { color:var(--muted); font-size:14px; font-weight:300; margin-bottom:1.8em; }
+
+/* ── About ──────────────────────────────────────────────────────── */
+.about-p { font-size:15px; color:var(--muted); font-weight:300; line-height:1.85; margin-bottom:1.8em; }
+.about-p strong { color:var(--text); font-weight:600; }
+.ftags { display:flex; gap:8px; flex-wrap:wrap; margin-top:0.5em; }
+.ftag {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px; font-size:12px; font-weight:400;
+    letter-spacing:0.06em; color:var(--muted);
+    border:1px solid var(--border); border-radius:3px;
+    background:var(--card);
+}
+.dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.db { background:var(--accent); }
+.dp { background:var(--purple); }
+.dg { background:var(--green); }
+
+/* ── Skills ─────────────────────────────────────────────────────── */
+.sg { display:flex; flex-direction:column; gap:1.8em; }
+.sg-lbl {
+    font-family:'Raleway',sans-serif; font-size:9.5px;
+    text-transform:uppercase; letter-spacing:0.18em;
+    color:var(--muted); margin-bottom:0.8em;
+}
+.tags { display:flex; flex-wrap:wrap; gap:8px; }
+.tag {
+    padding:6px 14px; font-size:12.5px; font-weight:300;
+    border-radius:3px; border:1px solid var(--border);
+    background:var(--card); color:var(--text);
+}
+.ta { border-color:rgba(126,184,212,0.3); color:var(--accent); background:rgba(126,184,212,0.06); }
+.tg { border-color:rgba(110,207,151,0.3); color:var(--green); background:rgba(110,207,151,0.06); }
+.tm { border-color:rgba(232,200,122,0.3); color:var(--amber); background:rgba(232,200,122,0.06); }
+.tp { border-color:rgba(184,159,232,0.3); color:var(--purple); background:rgba(184,159,232,0.06); }
+
+/* ── Experience ──────────────────────────────────────────────────── */
+.elist { display:flex; flex-direction:column; gap:1em; }
+.ec {
+    padding:1.5em 1.8em;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:3px;
+    transition:border-color 0.25s;
+}
+.ec:hover { border-color:rgba(255,255,255,0.4); }
+.ec-h {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    flex-wrap:wrap; gap:8px; margin-bottom:0.7em;
+}
+.ec-t {
+    font-family:'Raleway',sans-serif; font-size:13px; font-weight:700;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--text);
+}
+.ec-c { font-size:13px; color:var(--muted); font-weight:300; margin-top:3px; }
+.ec-r { text-align:right; }
+.ec-d { font-size:11.5px; color:var(--muted); font-weight:300; letter-spacing:0.06em; }
+.ongoing {
+    display:inline-block; font-family:'Raleway',sans-serif;
+    font-size:9px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.12em; color:var(--green);
+    border:1px solid rgba(110,207,151,0.35);
+    border-radius:2px; padding:2px 8px; margin-top:4px;
+}
+.ec-desc { font-size:13.5px; color:var(--muted); font-weight:300; line-height:1.7; margin-bottom:0.7em; }
+.ec-tags { font-size:11px; color:var(--muted); letter-spacing:0.06em; opacity:0.7; }
+
+/* ── Projects ────────────────────────────────────────────────────── */
+.pgrid { display:grid; grid-template-columns:1fr 1fr; gap:1em; }
+.pc {
+    padding:1.5em 1.8em;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:3px;
+    transition:border-color 0.25s, transform 0.2s;
+    display:flex; flex-direction:column;
+}
+.pc:hover { border-color:rgba(255,255,255,0.4); transform:translateY(-2px); }
+.pb {
+    display:inline-block; font-family:'Raleway',sans-serif;
+    font-size:9px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.12em;
+    padding:3px 10px; border-radius:2px; margin-bottom:0.9em;
+}
+.pb-etl { color:var(--green); border:1px solid rgba(110,207,151,0.35); }
+.pb-ai  { color:var(--purple); border:1px solid rgba(184,159,232,0.35); }
+.pb-mon { color:var(--amber); border:1px solid rgba(232,200,122,0.35); }
+.pb-cli { color:var(--accent); border:1px solid rgba(126,184,212,0.35); }
+.pt {
+    font-family:'Raleway',sans-serif; font-size:13px; font-weight:700;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--text); margin-bottom:0.6em;
+}
+.pd { font-size:13.5px; color:var(--muted); font-weight:300; line-height:1.7; flex:1; }
+.ps { margin-top:1em; font-size:10.5px; color:var(--muted); letter-spacing:0.05em; opacity:0.6; }
+.pl {
+    display:inline-flex; align-items:center; gap:4px; margin-top:1em;
+    font-family:'Raleway',sans-serif;
+    font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--muted); transition:color 0.2s;
+}
+.pl:hover { color:var(--text); }
+
+/* ── Apprenticeship callout ──────────────────────────────────────── */
+.callout {
+    padding:2em 2.2em;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:3px;
+}
+.callout-t {
+    font-family:'Raleway',sans-serif; font-size:15px; font-weight:700;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--text); margin-bottom:0.5em;
+}
+.callout-s { font-size:14px; color:var(--muted); font-weight:300; line-height:1.75; }
+.callout-s strong { color:var(--text); font-weight:600; }
+
+/* ── CV ──────────────────────────────────────────────────────────── */
+.cv-tb {
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:10px; margin-bottom:1em;
+}
+.cv-tabs { display:flex; gap:6px; }
+.cv-tab {
+    padding:6px 18px; border-radius:3px;
+    font-family:'Raleway',sans-serif;
+    font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+    border:1px solid var(--border); color:var(--muted);
+    background:transparent; cursor:pointer; transition:all 0.2s;
+}
+.cv-tab.active { background:rgba(255,255,255,0.1); color:var(--text); border-color:rgba(255,255,255,0.4); }
+.cv-tab:hover:not(.active) { color:var(--text); border-color:rgba(255,255,255,0.35); }
+.cv-acts { display:flex; gap:8px; flex-wrap:wrap; }
+.cv-dl {
+    display:inline-flex; align-items:center; gap:6px; padding:6px 18px;
+    font-family:'Raleway',sans-serif;
+    font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    text-decoration:none; border-radius:3px; transition:all 0.2s;
+}
+.cv-dl-p { background:rgba(255,255,255,0.1); color:var(--text); border:1px solid rgba(255,255,255,0.35); }
+.cv-dl-p:hover { background:rgba(255,255,255,0.18); }
+.cv-dl-s { background:transparent; color:var(--muted); border:1px solid var(--border); }
+.cv-dl-s:hover { color:var(--text); border-color:rgba(255,255,255,0.35); }
+.cv-view {
+    border:1px solid var(--border); border-radius:3px;
+    height:600px; background:#525659; overflow-y:auto; padding:10px;
+}
+.cv-load {
+    display:flex; align-items:center; justify-content:center;
+    height:100%; color:var(--muted); font-size:13px; gap:8px;
+}
+.cv-spin {
+    width:16px; height:16px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.15);
+    border-top-color:var(--accent); animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.pdf-pages canvas { width:100%; display:block; margin-bottom:6px; box-shadow:0 2px 10px rgba(0,0,0,0.4); }
+.cv-hidden { display:none !important; }
+
+/* ── Contact ─────────────────────────────────────────────────────── */
+.cgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:1.5em; }
+.cc {
+    display:flex; align-items:center; gap:14px; padding:1em 1.4em;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:3px; color:var(--muted); font-size:13px;
+    font-weight:300; transition:all 0.2s;
+}
+.cc:hover { color:var(--text); border-color:rgba(255,255,255,0.4); }
+.ci {
+    width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border); border-radius:3px; font-size:15px; flex-shrink:0;
+    background:rgba(255,255,255,0.04);
+}
+.footer {
+    padding:2em; text-align:center;
+    background:transparent;
+    font-family:'Raleway',sans-serif; font-size:9.5px; letter-spacing:0.15em;
+    text-transform:uppercase; color:var(--muted);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width:640px) {
+    body { background-attachment:scroll; }
+    html { scroll-padding-top:3.5em; }
+    .nav-links { display:none; }
+    .h-name { font-size:2rem; }
+    .pgrid { grid-template-columns:1fr; }
+    .cgrid { grid-template-columns:1fr; }
+    .cv-tb { flex-direction:column; align-items:flex-start; }
+    .sec, .intro-sec { padding:3.5em 0; }
+    .hero-image { height:100svh; }
+    .bottom-reveal { height:30vh; }
+    .ec-h { flex-direction:column; gap:4px; }
+    .ec-r { text-align:left; }
+    .btns { gap:8px; }
+    .btn { height:2.8em; font-size:10px; }
+}
+"""
+
+_JS_TEMPLATE = r"""
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+var PDF_P='__PDF_P__',PDF_S='__PDF_S__';
+var ldP=false,ldS=false;
+function b2b(b){var r=atob(b),a=new Uint8Array(r.length);for(var i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a;}
+function rPDF(b,pid,lel){
+  var c=document.getElementById(pid);
+  pdfjsLib.getDocument({data:b2b(b)}).promise.then(function(pdf){
+    if(lel)lel.style.display='none';
+    for(var p=1;p<=pdf.numPages;p++){(function(n){
+      var ph=document.createElement('div');c.appendChild(ph);
+      pdf.getPage(n).then(function(pg){
+        var w=c.offsetWidth||800,nat=pg.getViewport({scale:1}),vp=pg.getViewport({scale:w/nat.width});
+        var cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
+        ph.appendChild(cv);pg.render({canvasContext:cv.getContext('2d'),viewport:vp});
+      });
+    })(p);}
+  }).catch(function(e){if(lel)lel.innerHTML='';c.innerHTML='<p style="color:#f87171;padding:16px">Error: '+e.message+'</p>';});
+}
+document.getElementById('__DP_ID__').href='data:application/pdf;base64,'+PDF_P;
+document.getElementById('__DS_ID__').href='data:application/pdf;base64,'+PDF_S;
+var lel=document.querySelector('#__VP_ID__ .cv-load');
+rPDF(PDF_P,'__PP_ID__',lel);ldP=true;
+function showCV(l){
+  var ip=l==='__LP__';
+  document.getElementById('__VP_ID__').classList.toggle('cv-hidden',!ip);
+  document.getElementById('__VS_ID__').classList.toggle('cv-hidden',ip);
+  document.getElementById('__TP_ID__').classList.toggle('active',ip);
+  document.getElementById('__TS_ID__').classList.toggle('active',!ip);
+  if(!ldS&&!ip){rPDF(PDF_S,'__PS_ID__',null);ldS=true;}
+}
+function toggleTheme(){
+  var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);localStorage.setItem('theme',t);
+  var b=document.getElementById('tbtn');if(b)b.textContent=t==='dark'?'◑':'◐';
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.getElementById('tbtn');
+  if(b){var t=localStorage.getItem('theme')||'dark';b.textContent=t==='dark'?'◑':'◐';}
+});
+"""
 
 
 def _build_page(lang: str) -> str:
-    TXT = I18N[lang]
+    fr = lang == "FR"
+    pdf_fr = _get_pdf_b64("CV_FR_PRINCIPAL.pdf")
+    pdf_en = _get_pdf_b64("CV_Ibrahim_Kara_en.pdf")
+    pdf_p  = pdf_fr if fr else pdf_en
+    pdf_s  = pdf_en if fr else pdf_fr
 
-    RADAR_CATEGORIES = [
-        "Python", "SQL", "JavaScript",
-        "React", "Next.js", "Node.js",
-        "Docker", "Git", "LLMs", "PostgreSQL",
-    ]
-    RADAR_VALUES = [70, 75, 80, 80, 78, 75, 65, 75, 25, 75]
+    # CV element IDs
+    vp_id = "viewer-fr" if fr else "viewer-en"
+    vs_id = "viewer-en" if fr else "viewer-fr"
+    pp_id = "pages-fr"  if fr else "pages-en"
+    ps_id = "pages-en"  if fr else "pages-fr"
+    tp_id = "tab-fr"    if fr else "tab-en"
+    ts_id = "tab-en"    if fr else "tab-fr"
+    dp_id = "dl-fr"     if fr else "dl-en"
+    ds_id = "dl-en"     if fr else "dl-fr"
+    lp    = "fr"        if fr else "en"
+    ls    = "en"        if fr else "fr"   # noqa: F841
 
-    _k_data = "Data & AI"      if lang == "EN" else "Data & IA"
-    _k_lang = "Core Languages" if lang == "EN" else "Langages"
-    _k_fw   = "Frameworks & Tools"
-    _k_ops  = "Platform & Ops"
+    tab_p_lbl = "Français" if fr else "English"
+    tab_s_lbl = "English"  if fr else "Français"
+    dl_p_lbl  = "Télécharger CV FR" if fr else "Download CV EN"
+    dl_s_lbl  = "Download CV EN"    if fr else "Télécharger CV FR"
+    dl_p_name = "CV_Ibrahim_Kara_FR.pdf" if fr else "CV_Ibrahim_Kara_en.pdf"
+    dl_s_name = "CV_Ibrahim_Kara_en.pdf" if fr else "CV_Ibrahim_Kara_FR.pdf"
+    cv_loading = "Chargement…" if fr else "Loading…"
+    cv_sub     = "Disponible en français et en anglais" if fr else "Available in French and English"
 
-    SKILL_GROUPS = {
-        _k_lang: {"Python": 70, "SQL": 75, "JavaScript": 80},
-        _k_fw:   {"Node.js": 75, "Symfony": 65, "React": 80, "Next.js": 78},
-        _k_ops:  {"Docker": 65, "Git": 75, "Bash": 65, "VMWare": 60},
-        _k_data: {"LLMs": 25, "PostgreSQL": 75, "NoSQL": 75},
-    }
+    js = (_JS_TEMPLATE
+          .replace("__PDF_P__", pdf_p).replace("__PDF_S__", pdf_s)
+          .replace("__VP_ID__", vp_id).replace("__VS_ID__", vs_id)
+          .replace("__PP_ID__", pp_id).replace("__PS_ID__", ps_id)
+          .replace("__TP_ID__", tp_id).replace("__TS_ID__", ts_id)
+          .replace("__DP_ID__", dp_id).replace("__DS_ID__", ds_id)
+          .replace("__LP__",    lp))
 
-    GROUP_COLORS = {
-        _k_lang: THEME["accent"],
-        _k_fw:   THEME["green"],
-        _k_ops:  THEME["amber"],
-        _k_data: THEME["purple"],
-    }
+    lang_href = "/?lang=en" if fr else "/?lang=fr"
+    lang_lbl  = "EN"        if fr else "FR"
 
-    _cfg = {"displayModeBar": False, "responsive": True}
+    # ── Hero ──────────────────────────────────────────────────────────────────
+    avail  = "Disponible en alternance · Sept 2026" if fr else "Open for Apprenticeship · Sep 2026"
+    h_desc = (
+        "Étudiant à l'Efrei Paris, je passe du développement web à la Data Engineering & IA. "
+        "Je cherche une alternance de 24 mois à partir de septembre 2026."
+    ) if fr else (
+        "Efrei Paris student transitioning from web development to Data Engineering & AI. "
+        "Looking for a 24-month apprenticeship starting September 2026."
+    )
+    cta_proj    = "Voir mes projets" if fr else "See my projects"
+    cta_contact = "Me contacter"     if fr else "Get in touch"
 
-    fig_skills = make_subplots(
-        rows=1, cols=2,
-        specs=[[{"type": "polar"}, {"type": "xy"}]],
-        column_widths=[0.34, 0.66],
-        horizontal_spacing=0.34,
-        subplot_titles=[TXT["radar_title"], TXT["bar_title"]],
+    # ── About ─────────────────────────────────────────────────────────────────
+    about_lbl  = "À propos"       if fr else "About"
+    about_ttl  = "Qui suis-je ?"  if fr else "Who I am"
+    about_text = (
+        "Actuellement en 3ème année à l'Efrei Paris (Licence Web → Mastère Data Engineering & IA, 2023–2028), "
+        "j'ai appris à construire des applications web fullstack — des bases que j'applique désormais à des problématiques data. "
+        "Mon focus se porte sur la <strong>structuration et la transformation de données</strong>, "
+        "ainsi que sur l'intégration de <strong>LLMs</strong> dans des produits réels."
+    ) if fr else (
+        "Currently in my 3rd year at Efrei Paris (Web Bachelor's → Data &amp; AI Master's, 2023–2028), "
+        "I've built full-stack web applications — a foundation I now apply to data challenges. "
+        "My focus is on <strong>structuring and transforming data</strong> "
+        "and integrating <strong>LLMs</strong> into real products."
+    )
+    focus3 = "Mastère Data & IA · Efrei Paris" if fr else "Data &amp; AI Master's · Efrei Paris"
+
+    # ── Skills ────────────────────────────────────────────────────────────────
+    sk_lbl  = "Compétences" if fr else "Skills"
+    sk_ttl  = "Mon stack"   if fr else "My stack"
+    sk_lang = "Langages"    if fr else "Languages"
+    sk_data = "Data & IA"   if fr else "Data & AI"
+
+    # ── Experience ────────────────────────────────────────────────────────────
+    exp_lbl     = "Parcours"    if fr else "Journey"
+    exp_ttl     = "Expériences" if fr else "Experience"
+    exp_ongoing = "En cours"    if fr else "Ongoing"
+
+    e1t = "Développeur R&D — Stagiaire" if fr else "R&D Developer — Intern"
+    e1c = "Study'UP · Argenteuil"
+    e1d = "Fév–Mai 2026" if fr else "Feb–May 2026"
+    e1x = (
+        "Intégration d'un LLM (Anthropic) via Python pour des explications adaptées "
+        "de l'école primaire au lycée. Interface Next.js avec streaming LLM. "
+        "Prompt engineering avec approche socratique."
+    ) if fr else (
+        "Integrated an LLM (Anthropic) via Python to generate adaptive explanations "
+        "from primary to high school. Next.js chat interface with LLM streaming. "
+        "Prompt engineering with a Socratic approach."
+    )
+    e1s = "Next.js · Python · LLM · Prompt Engineering"
+
+    e2t = "Développeur Web — Stagiaire" if fr else "Web Developer — Intern"
+    e2c = "France Patrimoine Emc · Le Plessis-Trévise"
+    e2d = "Juin–Juil 2025" if fr else "Jun–Jul 2025"
+    e2x = (
+        "Application interne Vue.js pour le suivi commercial : gestion des leads, "
+        "rendez-vous, dossiers et signatures. Espace admin pour la supervision des performances."
+    ) if fr else (
+        "Internal Vue.js app for sales tracking: lead management, meetings, files, signatures. "
+        "Admin area for user management and performance supervision."
+    )
+    e2s = "Vue.js · JavaScript"
+
+    e3t = "Développeur Web — Stagiaire" if fr else "Web Developer — Intern"
+    e3c = "Alexis Finance · Noisy-le-Grand"
+    e3d = "Mai–Juil 2024" if fr else "May–Jul 2024"
+    e3x = (
+        "Optimisation UX du site web en collaboration avec l'équipe. "
+        "Création et intégration de vidéos de formation."
+    ) if fr else (
+        "Website UX optimization in collaboration with the team. "
+        "Creation and integration of training videos."
+    )
+    e3s = "JavaScript · UX"
+
+    # ── Projects ──────────────────────────────────────────────────────────────
+    pr_lbl  = "Travaux"  if fr else "Work"
+    pr_ttl  = "Projets"  if fr else "Projects"
+
+    p1d = (
+        "Pipeline ETL en Python pour traiter et nettoyer des logs serveurs simulés, "
+        "avec stockage structuré dans PostgreSQL."
+    ) if fr else (
+        "Python ETL pipeline to process and clean simulated server logs "
+        "with structured storage in PostgreSQL."
+    )
+    p2d = (
+        "Outil d'analyse de documents utilisant un LLM pour des résumés "
+        "automatisés et l'extraction de points clés."
+    ) if fr else (
+        "Document analysis tool using an LLM for automated summaries "
+        "and key insight extraction."
+    )
+    p3d = (
+        "Interface de monitoring CPU/RAM avec métriques simulées, "
+        "stockées en SQL et visualisées avec Plotly."
+    ) if fr else (
+        "CPU/RAM monitoring interface with simulated metrics "
+        "stored in SQL and visualized through Plotly."
+    )
+    p4d = (
+        "Site pro pour une entreprise de rénovation énergétique en Île-de-France. "
+        "Formulaire de contact avec email + devis PDF auto, galerie Supabase, CI/CD Vercel."
+    ) if fr else (
+        "Professional site for an energy renovation company in Île-de-France. "
+        "Contact form with email + auto PDF quote, Supabase gallery, Vercel CI/CD."
+    )
+    p4badge = "Client"   if fr else "Client Work"
+    p2badge = "IA"       if fr else "AI"
+
+    # ── Alternance ────────────────────────────────────────────────────────────
+    alt_lbl  = "Opportunité"        if fr else "Opportunity"
+    alt_ttl  = "Alternance 24 mois" if fr else "24-Month Apprenticeship"
+    alt_head = "Disponible en alternance · Septembre 2026" if fr else "Open for Apprenticeship · September 2026"
+    alt_sub  = "Mastère Data Engineering & IA · Efrei Paris" if fr else "Data Engineering &amp; AI Master's · Efrei Paris"
+    alt_rhy  = (
+        "Rythme : 2 semaines école / 1 semaine entreprise → 100% entreprise dès avril 2027"
+    ) if fr else (
+        "Schedule: 2 weeks school / 1 week company → 100% company from April 2027"
     )
 
-    fig_skills.add_trace(go.Scatterpolar(
-        r=RADAR_VALUES + [RADAR_VALUES[0]],
-        theta=RADAR_CATEGORIES + [RADAR_CATEGORIES[0]],
-        fill="toself",
-        fillcolor="rgba(37,99,235,0.12)",
-        line=dict(color=THEME["accent"], width=2),
-        marker=dict(size=6, color=THEME["accent_light"]),
-        hovertemplate=f"<b>%{{theta}}</b><br>{TXT['radar_level']}: %{{r}}/100<extra></extra>",
-        showlegend=False,
-    ), row=1, col=1)
-
-    _bar_skills, _bar_values, _bar_colors = [], [], []
-    for group_name, items in SKILL_GROUPS.items():
-        for skill, value in items.items():
-            _bar_skills.append(skill)
-            _bar_values.append(value)
-            _bar_colors.append(GROUP_COLORS[group_name])
-
-    fig_skills.add_trace(go.Bar(
-        y=_bar_skills,
-        x=_bar_values,
-        orientation="h",
-        marker=dict(color=_bar_colors),
-        hovertemplate="<b>%{y}</b>: %{x}/100<extra></extra>",
-        showlegend=False,
-    ), row=1, col=2)
-
-    for group_name in SKILL_GROUPS:
-        fig_skills.add_trace(go.Bar(
-            y=[], x=[], name=group_name, orientation="h",
-            marker=dict(color=GROUP_COLORS[group_name]),
-        ), row=1, col=2)
-
-    fig_skills.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=20, r=20, t=60, b=70),
-        height=520,
-        font=dict(family="Space Grotesk", color="#8888A0", size=11),
-        bargap=0.55,
-        polar=dict(
-            bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(
-                visible=True, range=[0, 100],
-                gridcolor="rgba(255,255,255,0.04)",
-                tickfont=dict(size=9, color=THEME["muted"]),
-            ),
-            angularaxis=dict(
-                gridcolor="rgba(255,255,255,0.06)",
-                tickfont=dict(size=11, color=THEME["text"], family="Inter"),
-            ),
-        ),
-        xaxis2=dict(
-            range=[0, 100],
-            gridcolor="rgba(255,255,255,0.06)",
-            tickfont=dict(color=THEME["muted"], size=10),
-            zeroline=False,
-            fixedrange=True,
-        ),
-        yaxis2=dict(
-            autorange="reversed",
-            tickfont=dict(color=THEME["text"], size=11),
-            tickmode="linear",
-            automargin=True,
-            fixedrange=True,
-        ),
-        dragmode=False,
-        legend=dict(
-            orientation="h", y=-0.15, x=0.80, xanchor="center",
-            font=dict(size=11, color=THEME["muted"]),
-            bgcolor="rgba(0,0,0,0)",
-        ),
-        shapes=[dict(
-            type="line",
-            xref="paper", yref="paper",
-            x0=0.45, x1=0.45, y0=0.02, y1=0.98,
-            line=dict(color="rgba(255,255,255,0.09)", width=1, dash="dot"),
-        )],
-    )
-    fig_skills.update_annotations(font_color=THEME["muted"], font_size=13)
-
-    skills_div = fig_skills.to_html(
-        full_html=False, include_plotlyjs="cdn",
-        config={"displayModeBar": False, "responsive": True, "staticPlot": False},
+    # ── Contact ───────────────────────────────────────────────────────────────
+    ct_lbl  = "Disponible · Sept 2026" if fr else "Available · Sep 2026"
+    ct_back = "Retour en haut"         if fr else "Back to top"
+    footer  = (
+        "Ibrahim Karamanlian · 2026 · Efrei Paris · Bac +3 Data & IA"
+    ) if fr else (
+        "Ibrahim Karamanlian · 2026 · Efrei Paris · Year 3 Data & AI"
     )
 
-    _sankey_roles = (
-        ["User", "UI", "API", "Storage", "AI", "Infra"]
-        if lang == "EN" else
-        ["Utilisateur", "Interface", "API", "Stockage", "IA", "Infra"]
-    )
-    fig_sankey = go.Figure(go.Sankey(
-        arrangement="snap",
-        node=dict(
-            pad=22, thickness=22,
-            line=dict(color="rgba(37,99,235,0.3)", width=1),
-            label=[
-                "Client / Browser",
-                "Next.js · React",
-                "Node.js · Symfony",
-                "PostgreSQL · NoSQL",
-                "Python · LLMs",
-                "Docker · Git",
-            ],
-            color=[THEME["card_alt"]] * 6,
-            customdata=_sankey_roles,
-            hovertemplate="%{label}<br><i>%{customdata}</i><extra></extra>",
-        ),
-        link=dict(
-            source=[0, 1, 2, 2, 3, 4],
-            target=[1, 2, 3, 4, 5, 5],
-            value=[10, 10, 6, 4, 4, 4],
-            color=[
-                "rgba(37,99,235,0.15)",
-                "rgba(37,99,235,0.15)",
-                "rgba(16,185,129,0.15)",
-                "rgba(168,85,247,0.15)",
-                "rgba(245,158,11,0.15)",
-                "rgba(245,158,11,0.15)",
-            ],
-            hovertemplate="%{source.label} → %{target.label}<extra></extra>",
-        ),
-    ))
-    fig_sankey.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Space Grotesk", color="#8888A0", size=12),
-        margin=dict(l=20, r=20, t=10, b=10),
-        height=200,
-    )
-    sankey_div = fig_sankey.to_html(full_html=False, include_plotlyjs=False, config=_cfg)
+    # ── Nav labels ────────────────────────────────────────────────────────────
+    nav_about = "À propos"   if fr else "About"
+    nav_exp   = "Expérience" if fr else "Experience"
+    nav_proj  = "Projets"    if fr else "Projects"
 
-    MONTHS     = TXT["alt_months"]
-    ENTREPRISE = [33, 33, 33, 33, 33, 33, 33, 100, 100, 100, 100, 100, 100]
-    ECOLE      = [67, 67, 67, 67, 67, 67, 67,   0,   0,   0,   0,   0,   0]
-    fig_alt = go.Figure()
-    fig_alt.add_trace(go.Bar(
-        x=MONTHS, y=ENTREPRISE, name=TXT["alt_company"],
-        marker=dict(color=THEME["accent"]),
-        hovertemplate=f"%{{x}}<br><b>{TXT['alt_company']}</b>: %{{y}}%<extra></extra>",
-    ))
-    fig_alt.add_trace(go.Bar(
-        x=MONTHS, y=ECOLE, name=TXT["alt_school"],
-        marker=dict(color="rgba(255,255,255,0.08)"),
-        hovertemplate=f"%{{x}}<br><b>{TXT['alt_school']}</b>: %{{y}}%<extra></extra>",
-    ))
-    fig_alt.update_layout(
-        barmode="stack",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter", color=THEME["text"], size=11),
-        margin=dict(l=40, r=20, t=30, b=40),
-        height=260,
-        xaxis=dict(
-            tickfont=dict(size=10, color=THEME["muted"]),
-            gridcolor="rgba(255,255,255,0.03)",
-        ),
-        yaxis=dict(
-            title=dict(text=TXT["alt_time_axis"], font=dict(size=10, color=THEME["muted"])),
-            ticksuffix="%",
-            range=[0, 108],
-            gridcolor="rgba(255,255,255,0.04)",
-            tickfont=dict(size=10, color=THEME["muted"]),
-        ),
-        legend=dict(
-            orientation="h", y=1.15, x=0.5, xanchor="center",
-            font=dict(size=11, color=THEME["muted"]),
-            bgcolor="rgba(0,0,0,0)",
-        ),
-        annotations=[dict(
-            x=TXT["alt_annotation_month"], y=107,
-            text=TXT["alt_annotation_text"],
-            showarrow=False,
-            font=dict(size=10, color=THEME["green"]),
-        )],
-    )
-    alt_div = fig_alt.to_html(full_html=False, include_plotlyjs=False, config=_cfg)
-
-    def tpl(name: str, extra: dict | None = None) -> str:
-        return Template(load(name, lang=lang)).safe_substitute({**THEME, **(extra or {})})
-
-    _lang_vars = {
-        "lang_en_class": "lang-active" if lang == "EN" else "",
-        "lang_fr_class": "lang-active" if lang == "FR" else "",
-    }
-    navbar        = tpl("navbar.html", _lang_vars)
-    hero          = tpl("hero.html")
-    presentation  = tpl("presentation.html")
-    skills_header = tpl("skills_header.html")
-    projects         = tpl("projects.html")
-    personal_projects = tpl("personal_projects.html")
-    sankey_label  = tpl("sankey_label.html")
-    experiences   = tpl("experiences.html")
-    alt_header    = tpl("alternance_header.html")
-    alt_banner    = tpl("alternance_banner.html")
-    cv            = tpl("cv.html", {
-        "pdf_fr": _get_pdf_b64("CV_FR_PRINCIPAL.pdf"),
-        "pdf_en": _get_pdf_b64("CV_Ibrahim_Kara_en.pdf"),
-    })
-    contact_file  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_FR_PRINCIPAL.pdf"
-    contact_name  = "CV_Ibrahim_Kara_en.pdf" if lang == "EN" else "CV_FR_PRINCIPAL.pdf"
-    contact       = tpl("contact.html", {
-        "cv_download_href": "data:application/pdf;base64," + _get_pdf_b64(contact_file),
-        "cv_download_name": contact_name,
-    })
-
-    global_css = (
-        "body,html{margin:0;padding:0;}"
-        "body{"
-        "background-color:var(--bg);"
-        "background-image:"
-        "linear-gradient(var(--rect-line) 1px,transparent 1px),"
-        "linear-gradient(90deg,var(--rect-line) 1px,transparent 1px),"
-        "linear-gradient(var(--rect-line-bold) 1px,transparent 1px),"
-        "linear-gradient(90deg,var(--rect-line-bold) 1px,transparent 1px);"
-        "background-size:60px 60px,60px 60px,300px 300px,300px 300px;"
-        "background-attachment:fixed;}"
-        "::-webkit-scrollbar{width:5px;}"
-        "::-webkit-scrollbar-track{background:var(--bg);}"
-        "::-webkit-scrollbar-thumb{background:#2563EB;border-radius:3px;}"
-        ".section-anchor{display:block;position:relative;top:-12px;visibility:hidden;height:0;}"
-        ".navbar{background:var(--navbar-bg)!important;}"
-        "[data-theme='light'] .navbar{border-bottom-color:rgba(0,0,0,0.07)!important;}"
-        "[data-theme='light'] .nav-lang{border-left-color:rgba(0,0,0,0.12)!important;}"
-        "[data-theme='light'] .nav-lang-sep{color:rgba(0,0,0,0.2)!important;}"
-        "[data-theme='light'] .nav-links a:hover{background:rgba(0,0,0,0.05)!important;}"
-        ".skills-wrap{background:var(--card-alt);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 0 3rem;}"
-        ".chart-wrap{width:100%;max-width:1200px;margin:1.5rem auto 0;padding:0 2.5rem;box-sizing:border-box;}"
-        "[data-theme='light'] .js-plotly-plot svg text{fill:#2d2d3a!important;}"
-        "[data-theme='light'] .js-plotly-plot .gridlayer path{stroke:rgba(0,0,0,0.09)!important;}"
-        "[data-theme='light'] .js-plotly-plot .angularaxis .angulartick text{fill:#2d2d3a!important;}"
-        "[data-theme='light'] .js-plotly-plot .radialaxis line{stroke:rgba(0,0,0,0.09)!important;}"
-        "[data-theme='light'] .js-plotly-plot .angular-line{stroke:rgba(0,0,0,0.12)!important;}"
-        ".skills-disclaimer{text-align:center;color:var(--muted);font-size:0.79rem;font-style:italic;"
-        "margin:1.6rem auto 0;max-width:700px;padding:1rem 2rem 0;"
-        "border-top:1px solid var(--border);font-family:'Space Grotesk',sans-serif;line-height:1.6;}"
-        ".js-plotly-plot .plotly .modebar{display:none!important;}"
-        ".theme-toggle{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);"
-        "background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;"
-        "color:var(--muted);transition:all 0.2s;font-size:15px;margin-right:4px;padding:0;}"
-        ".theme-toggle:hover{color:var(--text);border-color:var(--accent);}"
-        "@media(max-width:680px){"
-        ".chart-wrap{padding:0;margin-top:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;}"
-        ".chart-wrap .js-plotly-plot{min-width:620px;}"
-        ".skills-wrap{padding:2.5rem 0 2rem;}"
-        ".skills-disclaimer{margin:1.2rem 1.2rem 0;padding:0.8rem 1rem 0;font-size:0.75rem;}"
-        ".theme-toggle{display:none;}"
-        ".section-title{font-size:clamp(26px,7vw,40px)!important;}"
-        ".section-desc{font-size:13px!important;}"
-        "}"
+    # ── HTML ──────────────────────────────────────────────────────────────────
+    head = (
+        f'<!DOCTYPE html>\n<html lang="{lang.lower()}" data-theme="dark">\n<head>\n'
+        '<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        '<title>Ibrahim Karamanlian | Data Engineer</title>\n'
+        '<script>!function(){var t=localStorage.getItem("theme")||"dark";'
+        'document.documentElement.setAttribute("data-theme",t);}();</script>\n'
+        '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+        '<link href="https://fonts.googleapis.com/css2?'
+        'family=Raleway:wght@300;400;600;700;800'
+        '&family=Source+Sans+3:wght@300;400;600'
+        '&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">\n'
+        '<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">\n'
+        '<link rel="manifest" href="/assets/manifest.json">\n'
+        f'<style>{_CSS}</style>\n'
+        '</head>\n<body>\n'
     )
 
-    disclaimer_html = f'<p class="skills-disclaimer">{TXT["disclaimer"]}</p>'
+    navbar = (
+        '<nav class="nav">\n'
+        '  <div class="nav-i">\n'
+        '    <div class="nav-logo">Ibrahim<span>.</span></div>\n'
+        '    <ul class="nav-links">\n'
+        f'      <li><a href="#about">{nav_about}</a></li>\n'
+        '      <li><a href="#skills">Stack</a></li>\n'
+        f'      <li><a href="#experience">{nav_exp}</a></li>\n'
+        f'      <li><a href="#projects">{nav_proj}</a></li>\n'
+        '      <li><a href="#cv">CV</a></li>\n'
+        '      <li><a href="#contact">Contact</a></li>\n'
+        '    </ul>\n'
+        '    <div class="nav-r">\n'
+        f'      <a href="{lang_href}" class="nav-lang">{lang_lbl}</a>\n'
+        '      <button class="theme-btn" id="tbtn" onclick="toggleTheme()">◑</button>\n'
+        '    </div>\n'
+        '  </div>\n'
+        '</nav>\n'
+    )
 
-    parts = [
-        "<!DOCTYPE html>",
-        f'<html lang="{lang.lower()}">',
-        "<head>",
-        '<meta charset="utf-8">',
-        '<meta name="viewport" content="width=device-width, initial-scale=1">',
-        "<title>Ibrahim Karamanlian | Data Engineer</title>",
-        '<script>!function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)}();</script>',
-        '<link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-icon-57x57.png">',
-        '<link rel="apple-touch-icon" sizes="60x60" href="/assets/apple-icon-60x60.png">',
-        '<link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-icon-72x72.png">',
-        '<link rel="apple-touch-icon" sizes="76x76" href="/assets/apple-icon-76x76.png">',
-        '<link rel="apple-touch-icon" sizes="114x114" href="/assets/apple-icon-114x114.png">',
-        '<link rel="apple-touch-icon" sizes="120x120" href="/assets/apple-icon-120x120.png">',
-        '<link rel="apple-touch-icon" sizes="144x144" href="/assets/apple-icon-144x144.png">',
-        '<link rel="apple-touch-icon" sizes="152x152" href="/assets/apple-icon-152x152.png">',
-        '<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-icon-180x180.png">',
-        '<link rel="icon" type="image/png" sizes="192x192" href="/assets/android-icon-192x192.png">',
-        '<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">',
-        '<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96x96.png">',
-        '<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">',
-        '<link rel="manifest" href="/assets/manifest.json">',
-        '<meta name="msapplication-TileColor" content="#0A0A0F">',
-        '<meta name="msapplication-TileImage" content="/assets/ms-icon-144x144.png">',
-        '<meta name="theme-color" content="#0A0A0F">',
-        f"<style>{_BASE_CSS}</style>",
-        f"<style>{global_css}</style>",
-        "</head>",
-        "<body>",
-        navbar,
-        '<span id="home" class="section-anchor"></span>',
-        hero,
-        presentation,
-        '<span id="skills" class="section-anchor"></span>',
-        '<div class="skills-wrap">',
-        skills_header,
-        '<div class="chart-wrap">',
-        skills_div,
-        '</div>',
-        disclaimer_html,
-        "</div>",
-        '<span id="projects" class="section-anchor"></span>',
-        projects,
-        personal_projects,
-        sankey_label,
-        f'<div class="chart-wrap">{sankey_div}</div>',
-        '<span id="experience" class="section-anchor"></span>',
-        experiences,
-        '<span id="alternance" class="section-anchor"></span>',
-        alt_header,
-        f'<div class="chart-wrap">{alt_div}</div>',
-        alt_banner,
-        '<span id="cv" class="section-anchor"></span>',
-        cv,
-        '<span id="contact" class="section-anchor"></span>',
-        contact,
-        "<script>",
-        "function toggleTheme(){",
-        "  var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';",
-        "  document.documentElement.setAttribute('data-theme',t);",
-        "  localStorage.setItem('theme',t);",
-        "  var b=document.getElementById('theme-btn');",
-        "  if(b)b.textContent=t==='dark'?'◑':'◐';",
-        "}",
-        "document.addEventListener('DOMContentLoaded',function(){",
-        "  var b=document.getElementById('theme-btn');",
-        "  if(b){var t=localStorage.getItem('theme')||'dark';b.textContent=t==='dark'?'◑':'◐';}",
-        "});",
-        "</script>",
-        "</body>",
-        "</html>",
-    ]
-    return "\n".join(parts)
+
+    # Intro — première section opaque avec nom / rôle / CTAs
+    intro = (
+        '<section id="intro" class="intro-sec">\n'
+        '  <div class="w">\n'
+        f'    <div class="badge"><span class="pulse"></span>{avail}</div>\n'
+        '    <h1 class="h-name">Ibrahim Karamanlian</h1>\n'
+        '    <div class="h-role">Data Engineer</div>\n'
+        f'    <p class="h-desc">{h_desc}</p>\n'
+        '    <div class="btns">\n'
+        f'      <a href="#projects" class="btn btn-p">{cta_proj}</a>\n'
+        f'      <a href="#contact" class="btn btn-g">{cta_contact}</a>\n'
+        f'      <a href="data:application/pdf;base64,{pdf_p}" download="{dl_p_name}" class="btn btn-g">↓ CV</a>\n'
+        '    </div>\n'
+        '  </div>\n'
+        '</section>\n'
+    )
+
+    # Helper: section block with diagonal fill
+    def sec(anchor, content):
+        return (
+            f'<section id="{anchor}" class="sec">\n'
+            '  <div class="w">\n'
+            + content +
+            '  </div>\n'
+            '</section>\n'
+        )
+
+    about_content = (
+        f'    <div class="lbl">{about_lbl}</div>\n'
+        f'    <h2 class="ttl">{about_ttl}</h2>\n'
+        f'    <p class="about-p">{about_text}</p>\n'
+        '    <div class="ftags">\n'
+        '      <span class="ftag"><span class="dot db"></span>Data Engineering</span>\n'
+        '      <span class="ftag"><span class="dot dp"></span>LLMs &amp; IA générative</span>\n'
+        f'      <span class="ftag"><span class="dot dg"></span>{focus3}</span>\n'
+        '    </div>\n'
+    )
+
+    skills_content = (
+        f'    <div class="lbl">{sk_lbl}</div>\n'
+        f'    <h2 class="ttl">{sk_ttl}</h2>\n'
+        '    <div class="sg">\n'
+        f'      <div><div class="sg-lbl">{sk_lang}</div><div class="tags">'
+        '<span class="tag ta">Python</span>'
+        '<span class="tag ta">JavaScript</span>'
+        '<span class="tag ta">TypeScript</span>'
+        '<span class="tag ta">SQL</span>'
+        '</div></div>\n'
+        '      <div><div class="sg-lbl">Frameworks &amp; Libs</div><div class="tags">'
+        '<span class="tag tg">React</span>'
+        '<span class="tag tg">Next.js</span>'
+        '<span class="tag tg">Vue.js</span>'
+        '<span class="tag tg">Node.js</span>'
+        '<span class="tag tg">Tailwind CSS</span>'
+        '<span class="tag tg">Symfony</span>'
+        '</div></div>\n'
+        '      <div><div class="sg-lbl">Infra &amp; Ops</div><div class="tags">'
+        '<span class="tag tm">Docker</span>'
+        '<span class="tag tm">PostgreSQL</span>'
+        '<span class="tag tm">Supabase</span>'
+        '<span class="tag tm">Git</span>'
+        '<span class="tag tm">REST API</span>'
+        '</div></div>\n'
+        f'      <div><div class="sg-lbl">{sk_data}</div><div class="tags">'
+        '<span class="tag tp">ETL / Pipelines</span>'
+        '<span class="tag tp">Pandas</span>'
+        '<span class="tag tp">LLMs</span>'
+        '<span class="tag tp">Prompt Engineering</span>'
+        '</div></div>\n'
+        '    </div>\n'
+    )
+
+    exp_content = (
+        f'    <div class="lbl">{exp_lbl}</div>\n'
+        f'    <h2 class="ttl">{exp_ttl}</h2>\n'
+        '    <div class="elist">\n'
+        '      <div class="ec">\n'
+        '        <div class="ec-h">\n'
+        f'          <div><div class="ec-t">{e1t}</div><div class="ec-c">{e1c}</div></div>\n'
+        f'          <div class="ec-r"><div class="ec-d">{e1d}</div><div class="ongoing">{exp_ongoing}</div></div>\n'
+        '        </div>\n'
+        f'        <div class="ec-desc">{e1x}</div>\n'
+        f'        <div class="ec-tags">{e1s}</div>\n'
+        '      </div>\n'
+        '      <div class="ec">\n'
+        '        <div class="ec-h">\n'
+        f'          <div><div class="ec-t">{e2t}</div><div class="ec-c">{e2c}</div></div>\n'
+        f'          <div class="ec-r"><div class="ec-d">{e2d}</div></div>\n'
+        '        </div>\n'
+        f'        <div class="ec-desc">{e2x}</div>\n'
+        f'        <div class="ec-tags">{e2s}</div>\n'
+        '      </div>\n'
+        '      <div class="ec">\n'
+        '        <div class="ec-h">\n'
+        f'          <div><div class="ec-t">{e3t}</div><div class="ec-c">{e3c}</div></div>\n'
+        f'          <div class="ec-r"><div class="ec-d">{e3d}</div></div>\n'
+        '        </div>\n'
+        f'        <div class="ec-desc">{e3x}</div>\n'
+        f'        <div class="ec-tags">{e3s}</div>\n'
+        '      </div>\n'
+        '    </div>\n'
+    )
+
+    proj_content = (
+        f'    <div class="lbl">{pr_lbl}</div>\n'
+        f'    <h2 class="ttl">{pr_ttl}</h2>\n'
+        '    <div class="pgrid">\n'
+        '      <div class="pc">\n'
+        '        <span class="pb pb-etl">Pipeline ETL</span>\n'
+        '        <div class="pt">Log-Processing-Pipeline</div>\n'
+        f'        <div class="pd">{p1d}</div>\n'
+        '        <div class="ps">Python · Pandas · PostgreSQL · Docker</div>\n'
+        '        <a href="https://github.com/Kibraa/LogStream-Architect" target="_blank" class="pl">↗ GitHub</a>\n'
+        '      </div>\n'
+        '      <div class="pc">\n'
+        f'        <span class="pb pb-ai">{p2badge}</span>\n'
+        '        <div class="pt">Text-Analyzer</div>\n'
+        f'        <div class="pd">{p2d}</div>\n'
+        '        <div class="ps">Python · LLM API</div>\n'
+        '        <a href="https://github.com/Kibraa/semantic-brain" target="_blank" class="pl">↗ GitHub</a>\n'
+        '      </div>\n'
+        '      <div class="pc">\n'
+        '        <span class="pb pb-mon">Monitoring</span>\n'
+        '        <div class="pt">Metric-Board</div>\n'
+        f'        <div class="pd">{p3d}</div>\n'
+        '        <div class="ps">Next.js · SQL · Plotly · Tailwind</div>\n'
+        '        <a href="https://github.com/Kibraa/Metric-Board" target="_blank" class="pl">↗ GitHub</a>\n'
+        '      </div>\n'
+        '      <div class="pc">\n'
+        f'        <span class="pb pb-cli">{p4badge}</span>\n'
+        '        <div class="pt">3MECO</div>\n'
+        f'        <div class="pd">{p4d}</div>\n'
+        '        <div class="ps">Vue 3 · Node.js · Supabase · Vercel</div>\n'
+        '        <a href="https://3-m-eco.vercel.app" target="_blank" class="pl">↗ Voir le site</a>\n'
+        '      </div>\n'
+        '    </div>\n'
+    )
+
+    alt_content = (
+        f'    <div class="lbl">{alt_lbl}</div>\n'
+        f'    <h2 class="ttl">{alt_ttl}</h2>\n'
+        '    <div class="callout">\n'
+        f'      <div class="callout-t">{alt_head}</div>\n'
+        f'      <div class="callout-s"><strong>{alt_sub}</strong><br>{alt_rhy}</div>\n'
+        '    </div>\n'
+    )
+
+    cv_tab_onclick_p = f"showCV('{lp}')"
+    cv_tab_onclick_s = f"showCV('{ls}')"
+    cv_content = (
+        '    <div class="lbl">CV</div>\n'
+        f'    <h2 class="ttl">{"Mon CV" if fr else "My Resume"}</h2>\n'
+        f'    <p class="dsc">{cv_sub}</p>\n'
+        '    <div class="cv-tb">\n'
+        '      <div class="cv-tabs">\n'
+        f'        <button class="cv-tab active" id="{tp_id}" onclick="{cv_tab_onclick_p}" type="button">{tab_p_lbl}</button>\n'
+        f'        <button class="cv-tab" id="{ts_id}" onclick="{cv_tab_onclick_s}" type="button">{tab_s_lbl}</button>\n'
+        '      </div>\n'
+        '      <div class="cv-acts">\n'
+        f'        <a id="{dp_id}" class="cv-dl cv-dl-p" href="#" download="{dl_p_name}">{dl_p_lbl}</a>\n'
+        f'        <a id="{ds_id}" class="cv-dl cv-dl-s" href="#" download="{dl_s_name}">{dl_s_lbl}</a>\n'
+        '      </div>\n'
+        '    </div>\n'
+        '    <div class="cv-view">\n'
+        f'      <div id="{vp_id}">\n'
+        f'        <div class="cv-load"><div class="cv-spin"></div>{cv_loading}</div>\n'
+        f'        <div class="pdf-pages" id="{pp_id}"></div>\n'
+        '      </div>\n'
+        f'      <div id="{vs_id}" class="cv-hidden">\n'
+        f'        <div class="pdf-pages" id="{ps_id}"></div>\n'
+        '      </div>\n'
+        '    </div>\n'
+    )
+
+    contact_content = (
+        f'    <div class="lbl">{ct_lbl}</div>\n'
+        '    <h2 class="ttl">Contact</h2>\n'
+        '    <div class="cgrid">\n'
+        '      <a href="mailto:karamanlian.ibrahim@gmail.com" class="cc">\n'
+        '        <div class="ci">📧</div>karamanlian.ibrahim@gmail.com\n'
+        '      </a>\n'
+        '      <a href="tel:+33646864447" class="cc">\n'
+        '        <div class="ci">📱</div>06 46 86 44 47\n'
+        '      </a>\n'
+        '      <a href="https://github.com/Kibraa" target="_blank" class="cc">\n'
+        '        <div class="ci">'
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">'
+        '<path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387'
+        '.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416'
+        '-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729'
+        ' 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997'
+        '.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931'
+        ' 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0'
+        ' 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138'
+        ' 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176'
+        '.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921'
+        '.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576'
+        'C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>'
+        '</div>github.com/Kibraa\n'
+        '      </a>\n'
+        '    </div>\n'
+        f'    <div style="margin-top:40px;text-align:center;">'
+        f'<button type="button" class="btn btn-g" '
+        f'onclick="window.scrollTo({{top:0,behavior:\'smooth\'}})">↑ {ct_back}</button>'
+        f'</div>\n'
+    )
+
+    scripts = (
+        '<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>\n'
+        f'<script>{js}</script>\n'
+    )
+
+    return (
+        head + navbar + intro
+        + sec("about",      about_content)
+        + sec("skills",     skills_content)
+        + sec("experience", exp_content)
+        + sec("projects",   proj_content)
+        + sec("alternance", alt_content)
+        + sec("cv",         cv_content)
+        + sec("contact",    contact_content)
+        + '<div class="bottom-reveal"></div>\n'
+        + f'<div class="footer">{footer}</div>\n'
+        + scripts
+        + '</body>\n</html>'
+    )
 
 
 @nicegui_app.get("/")
@@ -479,6 +952,6 @@ ui.run(
     host="0.0.0.0",
     port=int(os.environ.get("PORT", 8080)),
     dark=True,
-    reload=False,
+    reload=True,
     show=False,
 )
