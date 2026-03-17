@@ -557,14 +557,19 @@ def _build_page(lang: str) -> str:
     alt_head = "Disponible en alternance · Septembre 2026" if fr else "Open for Apprenticeship · September 2026"
     alt_sub  = "Mastère Data Engineering & IA · Efrei Paris" if fr else "Data Engineering &amp; AI Master's · Efrei Paris"
     alt_body = (
-        "Je recherche une <strong>alternance de 24 mois</strong> dans le domaine du <strong>développement fullstack</strong>. "
+        "Je recherche une <strong>alternance de 24 mois</strong> dans l'un de ces deux domaines :<br><br>"
+        "→ <strong>Développement Full Stack &amp; IA</strong><br>"
+        "→ <strong>Data Engineering &amp; IA</strong><br><br>"
         "Motivé, curieux et à l'aise aussi bien côté front que back, je cherche à contribuer à des projets concrets "
         "tout en continuant à progresser."
     ) if fr else (
-        "I am looking for a <strong>24-month work-study contract</strong> in <strong>fullstack development</strong>. "
+        "I am looking for a <strong>24-month work-study contract</strong> in one of these two fields:<br><br>"
+        "→ <strong>Full Stack Development &amp; AI</strong><br>"
+        "→ <strong>Data Engineering &amp; AI</strong><br><br>"
         "Motivated and comfortable on both front-end and back-end, I want to contribute to real projects "
         "while continuing to grow."
     )
+    alt_rhy = "Rythme : pas encore communiqué par l'école" if fr else "Schedule: not yet communicated by the school"
 
     # ── Contact ───────────────────────────────────────────────────────────────
     ct_lbl  = "Disponible · Sept 2026" if fr else "Available · Sep 2026"
@@ -776,6 +781,7 @@ def _build_page(lang: str) -> str:
         f'      <div class="callout-t">{alt_head}</div>\n'
         f'      <div class="callout-s" style="margin-top:6px;font-size:12px;color:var(--muted);opacity:0.7;">{alt_sub}</div>\n'
         f'      <div class="callout-s" style="margin-top:10px;">{alt_body}</div>\n'
+        f'      <div class="callout-s" style="margin-top:14px;font-size:12px;opacity:0.5;">{alt_rhy}</div>\n'
         '    </div>\n'
     )
 
