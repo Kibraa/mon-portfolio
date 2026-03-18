@@ -10,38 +10,41 @@ python app.py
 
 # Install Python dependencies
 pip install -r requirements.txt
-
-# Install Node dependencies (Vite, for frontend asset work)
-npm install
-
-# Run Vite dev server (if working on frontend assets)
-npm run dev
 ```
 
-The app runs on port 8080 by default, or the `$PORT` environment variable if set.
+The app runs on port 8080 by default, or the `$PORT` environment variable if set. NiceGUI's `reload=True` is active — the server auto-restarts on file changes.
+
+The `package.json` / `npm run dev` (Vite) exist in the repo but are **not used** by the app. Ignore them.
 
 ## Architecture
 
-This is a **personal portfolio website** (bilingual FR/EN) built with NiceGUI/FastAPI as the backend. There is no frontend framework — the server dynamically assembles a full monolithic HTML page from template fragments and serves it.
+This is a **personal portfolio website** (bilingual FR/EN) served as a single monolithic HTML page. The entire backend is `app.py` (~880 lines). There is no frontend framework and no template engine.
 
 ### Core flow
 
-`app.py` is the entire backend. A single route (`GET /`) accepts `?lang=en|fr` and calls `_build_page(lang)`, which:
-1. Loads HTML fragments from `templates/` via string substitution
-2. Injects theme CSS variables from the `THEME` dict
-3. Renders interactive Plotly charts (skills radar, bar chart, Sankey, timeline) inline
-4. Returns a complete HTML document via `nicegui.ui.html()`
+`app.py` has one route (`GET /`) that reads `?lang=fr|en` and calls `_build_page(lang)`. That function assembles a complete HTML document by concatenating Python f-strings and returns it via FastAPI's `HTMLResponse`. NiceGUI is used only as the server wrapper (`ui.run()`).
 
-### Templates
+### How HTML is built
 
-- `templates/` holds HTML fragments (28 files). French is the default; English versions follow the `*_en.html` naming convention.
-- Template variables use `$varname` syntax, replaced at runtime with theme colors and translated strings.
-- The `I18N` dict in `app.py` holds all UI string translations.
+All HTML is constructed **inline in `_build_page()`** using Python f-strings — there is no template engine, no `$varname` substitution, and no external template files. The function:
 
-### Theme system
+1. Computes bilingual labels with inline `if fr else` ternaries (no `I18N` dict).
+2. Builds each section as a string (navbar, intro, about, skills, experience, projects, alternance, cv, contact).
+3. Concatenates them with a `sec(anchor, content)` helper that wraps content in `<section id="...">`.
+4. Returns `head + navbar + intro + sec(...) * N + footer + scripts`.
 
-A central `THEME` dict in `app.py` defines the full color palette. These are injected as CSS custom properties into the page. Light/dark mode is toggled client-side via JS with `localStorage` persistence.
+### CSS and theming
+
+A single `_CSS` string (defined at module level) contains all styles including a `:root { --bg; --card; --text; --muted; --border; --accent; --green; --amber; --purple; }` palette. Light/dark mode is toggled client-side via `data-theme` attribute + `localStorage`, using `toggleTheme()` in the inline JS.
+
+### PDF / CV
+
+`_get_pdf_b64(filename)` reads PDFs from `assets/` and base64-encodes them (LRU-cached). Both FR and EN CVs are embedded as data URIs for inline viewing (rendered page-by-page via pdf.js from a CDN) and direct download.
+
+### The `templates/` directory
+
+The `templates/` folder contains `.html` fragments that are **not imported or used** in the current `app.py`. They appear to be legacy files from a previous version of the site.
 
 ### Static assets
 
-`assets/` is mounted at `/assets`. PDFs (CVs) are also base64-encoded at runtime with LRU caching and embedded as data URIs for inline browser viewing.
+`assets/` is mounted at `/assets`. It contains favicons, CV PDFs, and images. PDFs are also base64-embedded at runtime (see above).

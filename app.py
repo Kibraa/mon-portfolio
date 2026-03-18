@@ -263,6 +263,17 @@ a { color:inherit; text-decoration:none; }
 }
 .pl:hover { color:var(--text); }
 
+/* ── Project domain nav ──────────────────────────────────────────── */
+.pd-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.6em;}
+.pd-tabs{display:flex;align-items:center;}
+.pd-tab{font-family:'Raleway',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);background:transparent;border:none;border-bottom:2px solid transparent;padding:4px 0 6px;margin-right:22px;cursor:pointer;transition:color 0.2s,border-color 0.2s;}
+.pd-tab.pdt-on{color:var(--text);border-bottom-color:var(--accent);}
+.pd-tab:hover:not(.pdt-on){color:rgba(255,255,255,0.75);}
+.pd-arr{display:inline-flex;align-items:center;gap:8px;font-family:'Raleway',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:3px;padding:6px 16px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.pd-arr:hover{color:var(--text);border-color:rgba(255,255,255,0.4);}
+.pd-group{display:none;grid-template-columns:1fr 1fr;gap:1em;}
+.pd-group.pdg-on{display:grid;}
+
 /* ── Apprenticeship callout ──────────────────────────────────────── */
 .callout {
     padding:2em 2.2em;
@@ -346,6 +357,8 @@ a { color:inherit; text-decoration:none; }
     .nav-links { display:none; }
     .h-name { font-size:2rem; }
     .pgrid { grid-template-columns:1fr; }
+    .pd-group.pdg-on { grid-template-columns:1fr; }
+    .pd-nav { flex-wrap:wrap; gap:8px; }
     .cgrid { grid-template-columns:1fr; }
     .cv-tb { flex-direction:column; align-items:flex-start; }
     .sec { padding:3em 0; }
@@ -398,6 +411,30 @@ document.addEventListener('DOMContentLoaded',function(){
   if(b){var t=localStorage.getItem('theme')||'dark';b.textContent=t==='dark'?'◑':'◐';}
 });
 """
+
+_PD_JS = """var _pdDomCur='data';
+var _pdLblData='__DATA__';
+var _pdLblDev='__DEV__';
+function pdSwitch(to){
+  if(to===_pdDomCur)return;
+  var prev=document.getElementById('pdg-'+_pdDomCur);
+  var next=document.getElementById('pdg-'+to);
+  var arr=document.getElementById('pd-arr-btn');
+  var goR=to==='dev';
+  prev.style.cssText='transition:opacity .22s ease,transform .22s ease;opacity:0;transform:translateX('+(goR?'-28px':'28px')+')';
+  setTimeout(function(){
+    prev.classList.remove('pdg-on');
+    prev.style.cssText='';
+    next.style.cssText='opacity:0;transform:translateX('+(goR?'28px':'-28px')+')';
+    next.classList.add('pdg-on');
+    void next.offsetWidth;
+    next.style.cssText='transition:opacity .3s ease,transform .3s ease;opacity:1;transform:translateX(0)';
+    setTimeout(function(){next.style.cssText='';},320);
+    _pdDomCur=to;
+    [].forEach.call(document.querySelectorAll('.pd-tab'),function(t){t.classList.toggle('pdt-on',t.getAttribute('data-dom')===to);});
+    arr.textContent=to==='dev'?'\u2190 '+_pdLblData:_pdLblDev+' \u2192';
+  },230);
+}"""
 
 
 def _build_page(lang: str) -> str:
@@ -519,6 +556,11 @@ def _build_page(lang: str) -> str:
     # ── Projects ──────────────────────────────────────────────────────────────
     pr_lbl  = "Travaux"  if fr else "Work"
     pr_ttl  = "Projets"  if fr else "Projects"
+    dom_data = "Data & IA" if fr else "Data & AI"
+    dom_dev  = "Développement" if fr else "Development"
+    pd_js = (_PD_JS
+             .replace("__DATA__", dom_data)
+             .replace("__DEV__", dom_dev))
 
     p1d = (
         "Pipeline ETL en Python pour traiter et nettoyer des logs serveurs simulés, "
@@ -550,6 +592,25 @@ def _build_page(lang: str) -> str:
     )
     p4badge = "Client"   if fr else "Client Work"
     p2badge = "IA"       if fr else "AI"
+    p6badge = "Réservation" if fr else "Booking"
+    p5d = (
+        "Application full-stack de location de cloud fictive. Architecture trois tiers : "
+        "frontend React, API Gateway Node.js/Express avec auth JWT, "
+        "API métier séparée et base MySQL. Déployé avec Docker Compose."
+    ) if fr else (
+        "Full-stack fictional cloud rental app. Three-tier architecture: "
+        "React frontend, Node.js/Express API Gateway with JWT auth, "
+        "dedicated business API and MySQL database. Deployed with Docker Compose."
+    )
+    p6d = (
+        "Plateforme de location de voitures réalisée en groupe (Fil Rouge). "
+        "Catalogue de véhicules, réservation en ligne et gestion de compte. "
+        "Frontend Vue.js 3, API Express.js, authentification Supabase + JWT."
+    ) if fr else (
+        "Online car rental platform built as a group project (Fil Rouge). "
+        "Vehicle catalogue, online booking and account management. "
+        "Vue.js 3 frontend, Express.js API, Supabase + JWT authentication."
+    )
 
     # ── Alternance ────────────────────────────────────────────────────────────
     alt_lbl  = "Opportunité"        if fr else "Opportunity"
@@ -739,7 +800,14 @@ def _build_page(lang: str) -> str:
     proj_content = (
         f'    <div class="lbl">{pr_lbl}</div>\n'
         f'    <h2 class="ttl">{pr_ttl}</h2>\n'
-        '    <div class="pgrid">\n'
+        f'    <div class="pd-nav">\n'
+        f'      <div class="pd-tabs">\n'
+        f'        <button class="pd-tab pdt-on" data-dom="data" onclick="pdSwitch(this.getAttribute(\'data-dom\'))">{dom_data}</button>\n'
+        f'        <button class="pd-tab" data-dom="dev" onclick="pdSwitch(this.getAttribute(\'data-dom\'))">{dom_dev}</button>\n'
+        f'      </div>\n'
+        f'      <button class="pd-arr" id="pd-arr-btn" onclick="pdSwitch(_pdDomCur===\'data\'?\'dev\':\'data\')">{dom_dev} \u2192</button>\n'
+        f'    </div>\n'
+        '    <div class="pd-group pdg-on" id="pdg-data">\n'
         '      <div class="pc">\n'
         '        <span class="pb pb-etl">Pipeline ETL</span>\n'
         '        <div class="pt">Log-Processing-Pipeline</div>\n'
@@ -764,12 +832,28 @@ def _build_page(lang: str) -> str:
         '        <div style="margin-top:8px;font-size:10.5px;color:var(--muted);opacity:0.55;letter-spacing:0.04em;">réalisé avec Claude</div>\n'
         '        <a href="https://github.com/Kibraa/Metric-Board" target="_blank" class="pl">↗ GitHub</a>\n'
         '      </div>\n'
+        '    </div>\n'
+        '    <div class="pd-group" id="pdg-dev">\n'
         '      <div class="pc">\n'
         f'        <span class="pb pb-cli">{p4badge}</span>\n'
         '        <div class="pt">3MECO</div>\n'
         f'        <div class="pd">{p4d}</div>\n'
         '        <div class="ps">Vue 3 · Node.js · Supabase · Vercel</div>\n'
         '        <a href="https://3-m-eco.vercel.app" target="_blank" class="pl">↗ Voir le site</a>\n'
+        '      </div>\n'
+        '      <div class="pc">\n'
+        '        <span class="pb pb-mon">API REST</span>\n'
+        '        <div class="pt">Cloudify</div>\n'
+        f'        <div class="pd">{p5d}</div>\n'
+        '        <div class="ps">React · Node.js · Express · MySQL · Docker · TypeScript</div>\n'
+        '        <a href="https://github.com/HamzaMrs/Cloudify" target="_blank" class="pl">↗ GitHub</a>\n'
+        '      </div>\n'
+        '      <div class="pc">\n'
+        f'        <span class="pb pb-ai">{p6badge}</span>\n'
+        '        <div class="pt">EliteLoc</div>\n'
+        f'        <div class="pd">{p6d}</div>\n'
+        '        <div class="ps">Vue.js 3 · Tailwind · Node.js · Express · Supabase · JWT</div>\n'
+        '        <a href="https://github.com/ibrahima-gh/EliteLoc" target="_blank" class="pl">↗ GitHub</a>\n'
         '      </div>\n'
         '    </div>\n'
     )
@@ -848,6 +932,7 @@ def _build_page(lang: str) -> str:
     scripts = (
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>\n'
         f'<script>{js}</script>\n'
+        f'<script>{pd_js}</script>\n'
     )
 
     return (
