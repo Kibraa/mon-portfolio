@@ -354,6 +354,14 @@ body { counter-reset:sec-cnt; }
     border:1px solid var(--border); border-radius:0;
     height:600px; background:#0A0907; overflow-y:auto; padding:10px;
 }
+@media (max-width:640px) {
+    .cv-tb { flex-direction:column; align-items:flex-start; gap:12px; }
+    .cv-tabs { width:100%; }
+    .cv-tab { flex:1; text-align:center; padding:8px 10px; }
+    .cv-acts { width:100%; }
+    .cv-dl { flex:1; justify-content:center; }
+    .cv-view { height:420px; padding:6px; }
+}
 .cv-load {
     display:flex; align-items:center; justify-content:center;
     height:100%; color:var(--muted); font-size:13px; gap:8px;
@@ -364,7 +372,7 @@ body { counter-reset:sec-cnt; }
     border-top-color:var(--accent); animation:spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
-.pdf-pages canvas { width:100%; display:block; margin-bottom:6px; box-shadow:0 2px 10px rgba(0,0,0,0.4); }
+.pdf-pages canvas { display:block; box-shadow:0 2px 10px rgba(0,0,0,0.4); }
 .cv-hidden { display:none !important; }
 
 /* ── Contact ─────────────────────────────────────────────────────── */
@@ -416,14 +424,20 @@ var ldP=false,ldS=false;
 function b2b(b){var r=atob(b),a=new Uint8Array(r.length);for(var i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a;}
 function rPDF(b,pid,lel){
   var c=document.getElementById(pid);
-  pdfjsLib.getDocument({data:b2b(b)}).promise.then(function(pdf){
+  var dpr=window.devicePixelRatio||1;
+  pdfjsLib.getDocument({data:b2b(b),cMapUrl:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',cMapPacked:true}).promise.then(function(pdf){
     if(lel)lel.style.display='none';
     for(var p=1;p<=pdf.numPages;p++){(function(n){
-      var ph=document.createElement('div');c.appendChild(ph);
+      var ph=document.createElement('div');ph.style.marginBottom='6px';c.appendChild(ph);
       pdf.getPage(n).then(function(pg){
-        var w=c.offsetWidth||800,nat=pg.getViewport({scale:1}),vp=pg.getViewport({scale:w/nat.width});
-        var cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
-        ph.appendChild(cv);pg.render({canvasContext:cv.getContext('2d'),viewport:vp});
+        var w=c.offsetWidth||800,nat=pg.getViewport({scale:1}),scale=(w/nat.width)*dpr;
+        var vp=pg.getViewport({scale:scale});
+        var cv=document.createElement('canvas');
+        cv.width=vp.width;cv.height=vp.height;
+        cv.style.width=(vp.width/dpr)+'px';cv.style.height=(vp.height/dpr)+'px';
+        cv.style.display='block';
+        ph.appendChild(cv);
+        pg.render({canvasContext:cv.getContext('2d',{alpha:false}),viewport:vp});
       });
     })(p);}
   }).catch(function(e){if(lel)lel.innerHTML='';c.innerHTML='<p style="color:#f87171;padding:16px">Error: '+e.message+'</p>';});
@@ -478,8 +492,8 @@ function pdSwitch(to){
 
 def _build_page(lang: str) -> str:
     fr = lang == "FR"
-    pdf_fr = _get_pdf_b64("CV_FR_PRINCIPAL.pdf")
-    pdf_en = _get_pdf_b64("CV_Ibrahim_Kara_en.pdf")
+    pdf_fr = _get_pdf_b64("CV_FR_PRINCIPAL-2.pdf")
+    pdf_en = _get_pdf_b64("CV_PRINCIPAL.pdf")
     pdf_p  = pdf_fr if fr else pdf_en
     pdf_s  = pdf_en if fr else pdf_fr
 
@@ -499,8 +513,8 @@ def _build_page(lang: str) -> str:
     tab_s_lbl = "English"  if fr else "Français"
     dl_p_lbl  = "Télécharger CV FR" if fr else "Download CV EN"
     dl_s_lbl  = "Download CV EN"    if fr else "Télécharger CV FR"
-    dl_p_name = "CV_Ibrahim_Kara_FR.pdf" if fr else "CV_Ibrahim_Kara_en.pdf"
-    dl_s_name = "CV_Ibrahim_Kara_en.pdf" if fr else "CV_Ibrahim_Kara_FR.pdf"
+    dl_p_name = "CV_FR_PRINCIPAL-2.pdf" if fr else "CV_PRINCIPAL.pdf"
+    dl_s_name = "CV_PRINCIPAL.pdf"      if fr else "CV_FR_PRINCIPAL-2.pdf"
     cv_loading = "Chargement…" if fr else "Loading…"
     cv_sub     = "Disponible en français et en anglais" if fr else "Available in French and English"
 
@@ -545,7 +559,7 @@ def _build_page(lang: str) -> str:
 
     # ── Skills ────────────────────────────────────────────────────────────────
     sk_lbl  = "Compétences" if fr else "Skills"
-    sk_ttl  = "Mon stack"   if fr else "My stack"
+    sk_ttl  = "Ma stack"   if fr else "My stack"
     sk_lang = "Langages"    if fr else "Languages"
     sk_data = "Data & IA"   if fr else "Data & AI"
 
@@ -669,7 +683,7 @@ def _build_page(lang: str) -> str:
         "Motivated and comfortable on both front-end and back-end, I want to contribute to real projects "
         "while continuing to grow."
     )
-    alt_rhy = "Rythme : pas encore communiqué par l'école" if fr else "Schedule: not yet communicated by the school"
+    alt_rhy = "Rythme : 1 semaine formation / 2 semaines entreprise" if fr else "Schedule: 1 week school / 2 weeks company"
 
     # ── Contact ───────────────────────────────────────────────────────────────
     ct_lbl  = "Disponible · Sept 2026" if fr else "Available · Sep 2026"
@@ -894,6 +908,24 @@ def _build_page(lang: str) -> str:
         '        <a href="https://github.com/ibrahima-gh/EliteLoc" target="_blank" class="pl">↗ GitHub</a>\n'
         '      </div>\n'
         '    </div>\n'
+        '    <div style="margin-top:1.8em;text-align:center;">\n'
+        '      <a href="https://github.com/Kibraa" target="_blank" class="cc" style="display:inline-flex;width:auto;">\n'
+        '        <div class="ci">'
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">'
+        '<path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387'
+        '.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416'
+        '-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729'
+        ' 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997'
+        '.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931'
+        ' 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0'
+        ' 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138'
+        ' 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176'
+        '.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921'
+        '.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576'
+        'C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>'
+        '</div>github.com/Kibraa\n'
+        '      </a>\n'
+        '    </div>\n'
     )
 
     alt_content = (
@@ -943,22 +975,6 @@ def _build_page(lang: str) -> str:
         '      </a>\n'
         '      <a href="tel:+33646864447" class="cc">\n'
         '        <div class="ci">📱</div>06 46 86 44 47\n'
-        '      </a>\n'
-        '      <a href="https://github.com/Kibraa" target="_blank" class="cc">\n'
-        '        <div class="ci">'
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">'
-        '<path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387'
-        '.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416'
-        '-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729'
-        ' 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997'
-        '.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931'
-        ' 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0'
-        ' 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138'
-        ' 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176'
-        '.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921'
-        '.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576'
-        'C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>'
-        '</div>github.com/Kibraa\n'
         '      </a>\n'
         '    </div>\n'
         f'    <div style="margin-top:40px;text-align:center;">'
