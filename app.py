@@ -492,7 +492,7 @@ function pdSwitch(to){
 
 def _build_page(lang: str) -> str:
     fr = lang == "FR"
-    pdf_fr = _get_pdf_b64("CV_FR_PRINCIPAL-2.pdf")
+    pdf_fr = _get_pdf_b64("CV_Ibrahim_Karamanlian_2026.pdf")
     pdf_en = _get_pdf_b64("CV_PRINCIPAL.pdf")
     pdf_p  = pdf_fr if fr else pdf_en
     pdf_s  = pdf_en if fr else pdf_fr
@@ -513,8 +513,8 @@ def _build_page(lang: str) -> str:
     tab_s_lbl = "English"  if fr else "Français"
     dl_p_lbl  = "Télécharger CV FR" if fr else "Download CV EN"
     dl_s_lbl  = "Download CV EN"    if fr else "Télécharger CV FR"
-    dl_p_name = "CV_FR_PRINCIPAL-2.pdf" if fr else "CV_PRINCIPAL.pdf"
-    dl_s_name = "CV_PRINCIPAL.pdf"      if fr else "CV_FR_PRINCIPAL-2.pdf"
+    dl_p_name = "CV_Ibrahim_Karamanlian_2026.pdf" if fr else "CV_PRINCIPAL.pdf"
+    dl_s_name = "CV_PRINCIPAL.pdf"               if fr else "CV_Ibrahim_Karamanlian_2026.pdf"
     cv_loading = "Chargement…" if fr else "Loading…"
     cv_sub     = "Disponible en français et en anglais" if fr else "Available in French and English"
 
