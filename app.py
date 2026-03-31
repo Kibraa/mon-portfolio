@@ -376,19 +376,24 @@ body { counter-reset:sec-cnt; }
 .cv-hidden { display:none !important; }
 
 /* ── Contact ─────────────────────────────────────────────────────── */
-.cgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:1.5em; }
+.cgrid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:1.8em; }
 .cc {
-    display:flex; align-items:center; gap:14px; padding:1em 1.4em;
-    background:var(--card); border:1px solid var(--border);
-    border-radius:3px; color:var(--muted); font-size:13px;
-    font-weight:300; transition:all 0.2s;
+    display:flex; flex-direction:column; gap:8px; padding:1.4em 1.6em;
+    background:transparent; border:1px solid var(--border);
+    border-left:2px solid var(--accent);
+    color:var(--muted); text-decoration:none; transition:all 0.2s;
 }
-.cc:hover { color:var(--text); border-color:rgba(255,255,255,0.4); }
-.ci {
-    width:34px; height:34px; display:flex; align-items:center; justify-content:center;
-    border:1px solid var(--border); border-radius:3px; font-size:15px; flex-shrink:0;
-    background:rgba(255,255,255,0.04);
+.cc:hover { color:var(--text); border-color:var(--accent); transform:translateX(4px); }
+.cc-label {
+    font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.18em;
+    text-transform:uppercase; color:var(--accent); opacity:0.7;
 }
+.cc-value {
+    font-size:13px; font-weight:300; color:var(--muted); display:flex;
+    align-items:center; gap:8px; transition:color 0.2s;
+}
+.cc:hover .cc-value { color:var(--text); }
+.cc-icon { flex-shrink:0; opacity:0.6; }
 .footer {
     padding:2em; text-align:center;
     background:transparent;
@@ -971,10 +976,21 @@ def _build_page(lang: str) -> str:
         '    <h2 class="ttl">Contact</h2>\n'
         '    <div class="cgrid">\n'
         '      <a href="mailto:karamanlian.ibrahim@gmail.com" class="cc">\n'
-        '        <div class="ci">📧</div>karamanlian.ibrahim@gmail.com\n'
+        '        <div class="cc-label">Email</div>\n'
+        '        <div class="cc-value">'
+        '<svg class="cc-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">'
+        '<rect x="2" y="4" width="20" height="16" rx="2"/>'
+        '<path d="m2 7 10 7 10-7"/>'
+        '</svg>'
+        'karamanlian.ibrahim@gmail.com</div>\n'
         '      </a>\n'
         '      <a href="tel:+33646864447" class="cc">\n'
-        '        <div class="ci">📱</div>06 46 86 44 47\n'
+        '        <div class="cc-label">Téléphone</div>\n'
+        '        <div class="cc-value">'
+        '<svg class="cc-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">'
+        '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>'
+        '</svg>'
+        '06 46 86 44 47</div>\n'
         '      </a>\n'
         '    </div>\n'
         f'    <div style="margin-top:40px;text-align:center;">'
